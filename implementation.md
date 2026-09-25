@@ -54,7 +54,7 @@ Do not add product features speculatively. Prefer a direct screen or native cont
 - Use the existing Expo Router / TypeScript app structure and dependencies. Avoid a server and avoid adding dependencies for one-off UI details.
 - For Expo Go: from `mobile/`, run `npm install` and `npx expo start`; scan the QR code on the same network.
 - For an installable APK: use the EAS `preview` profile in `mobile/eas.json`, which must produce an APK rather than an app bundle. State clearly if no hosted APK build has been produced.
-- Follow `instructions.md` for the presenter walkthrough and `mobile/README.md` for app-specific launch/build details.
+- Follow the root `README.md` for Expo Go setup, APK build steps, and the presenter walkthrough; use `mobile/README.md` for app-specific details.
 - Before completion, follow `mobile/AGENTS.md` for Expo lint and TypeScript checks. Never describe those checks as an APK build.
 
 ## Out of scope

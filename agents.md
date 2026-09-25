@@ -57,4 +57,4 @@ See `implementation.md` for the original detailed execution brief and `mobile/RE
 - Apply YAGNI: retain only features that serve the agreed demo MVP, reuse Expo / React Native primitives, and avoid new layers, dependencies, or settings without a demonstrated need.
 - Keep the local model and alert rule small. Share thresholds between status and alert logic, and call them illustrative and unvalidated.
 - Do not add accounts, backend, IoT, camera processing, notifications, billing, or claims of farm validation without new requirements and evidence.
-- Keep `implementation.md`, `instructions.md`, and `mobile/README.md` aligned with the working screens and demo flow.
+- Keep `README.md`, `implementation.md`, and `mobile/README.md` aligned with the working screens and demo flow.

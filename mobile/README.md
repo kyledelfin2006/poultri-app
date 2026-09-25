@@ -2,7 +2,7 @@
 
 Expo / React Native app for demonstrating Poultri's early-warning experience with simulated farm data. It works locally and does not connect to cameras, sensors, or a server.
 
-For complete run, APK installation, and demo walkthrough instructions, see the repository's [instructions.md](../instructions.md).
+For the complete Expo Go setup, APK build steps, and demo walkthrough, see the repository [README](../README.md#run-the-demo).
 
 ## Run with Expo Go
 
