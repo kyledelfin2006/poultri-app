@@ -33,15 +33,25 @@ An APK runs as a standalone app and is suitable for a mentor or business-partner
    ```powershell
    cd mobile
    npm install
-   npm install --global eas-cli
-   eas login
-   eas build --platform android --profile preview
+   npx eas-cli@latest login
    ```
 
-3. If EAS asks to configure or link the project, follow its prompts.
-4. When the build finishes, open its link on the Android phone and download/install the APK. Android may ask you to allow installation from that browser or file manager.
+3. Link the mobile app to your Expo account once:
 
-The `preview` profile in `mobile/eas.json` is configured to create an installable APK. No APK or signing credentials are checked into this repository.
+   ```powershell
+   npx eas-cli@latest init
+   ```
+
+   This creates or links the cloud project and writes its project ID into `mobile/app.json`.
+4. Build the APK from `mobile/`:
+
+   ```powershell
+   npm run build:apk
+   ```
+
+5. When the cloud build finishes, open its link on the Android phone and download/install the APK. Android may ask you to allow installation from that browser or file manager.
+
+The `build:apk` script runs the latest EAS CLI on demand, so no global install is needed. The `preview` profile in `mobile/eas.json` is configured to create an installable APK. No APK or signing credentials are checked into this repository.
 
 ## Demo walkthrough
 

@@ -14,12 +14,30 @@ Expo Go is convenient for development demonstrations. For a shareable APK, build
 
 ## Build an Android APK
 
-1. Create/sign in to an Expo account and install the EAS CLI: `npm install -g eas-cli`.
-2. From this folder, run `eas login`, then `eas build:configure` if EAS asks to link the app.
-3. Run `eas build --platform android --profile preview`.
-4. When the build completes, open the build link on the Android phone and install the `.apk`.
+1. Create or sign in to an [Expo account](https://expo.dev/).
+2. In this folder, install the app packages and sign in to EAS:
 
-The `preview` profile is configured for an installable APK. An Expo account and network access are required for the hosted build. This repository does not contain a built APK or signing credentials.
+   ```bash
+   npm install
+   npx eas-cli@latest login
+   ```
+
+3. Link this app to your Expo account once:
+
+   ```bash
+   npx eas-cli@latest init
+   ```
+
+   This creates or links the cloud project and writes its project ID into `app.json`.
+4. Create the APK:
+
+   ```bash
+   npm run build:apk
+   ```
+
+5. When the cloud build completes, open its build link on the Android phone and install the `.apk`.
+
+The `build:apk` script uses the `preview` profile, which is configured for an installable APK. EAS CLI runs on demand through `npx`; it is not an app dependency. An Expo account and network access are required for the hosted build. This repository does not contain a built APK or signing credentials.
 
 ## Walkthrough
 
