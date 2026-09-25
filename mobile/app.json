@@ -2,15 +2,24 @@
   "expo": {
     "name": "Poultri",
     "slug": "poultri",
+    "scheme": "poultri",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/poultri-logo.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "package": "com.poultri.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/poultri-logo.png"
+      },
       "predictiveBackGestureEnabled": false
-    }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
