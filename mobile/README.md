@@ -23,11 +23,10 @@ The `preview` profile is configured for an installable APK. An Expo account and 
 
 ## Walkthrough
 
-- Overview shows three simulated houses and a combined rising-temperature/reduced-movement alert.
-- Tap a house for simulated readings and an illustrative trend.
-- Tap an alert to acknowledge it or mark it resolved.
-- Records shows seven days of illustrative egg production.
-- Overview or About has controls to trigger a sample alert, simulate offline mode, and reset the demo.
-- About explains proposed pricing, validation targets, and prototype limitations.
+- The welcome screen opens the local demo without real authentication.
+- Home has four step-through scenarios, accessible scenario choices, and House 2 sliders that preview values while dragging and update linked trends/alerts on release.
+- Alerts support acknowledgement, resolution, and a saved inspection note.
+- Records are filterable by house; today's demo egg count is editable.
+- Profile edits the farm, owner, house names and bird counts, and can reset demo data.
 
 All data is labeled as demo data. The warning is for inspection and is not a diagnosis.

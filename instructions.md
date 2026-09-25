@@ -42,11 +42,13 @@ The preview profile in `mobile/eas.json` is set to create an installable APK. No
 
 ## Demo walkthrough
 
-1. On **Overview**, show the three poultry houses and the sample warning on House 2.
-2. Open the warning. Explain that it highlights a change to inspect and is not a diagnosis.
-3. Acknowledge the alert or mark it resolved.
-4. Open **Records** to show the illustrative egg-production history.
-5. On Overview or About, try **Simulate offline**, **Trigger sample alert**, and **Reset demo**.
+1. Continue from the branded welcome screen into the demo farm.
+2. On **Home**, select **Temperature rising** or **Movement dropping**, then advance the scenario step by step. Watch the chart, house status, and alert update.
+3. Use the House 2 sliders to create a custom example. The value previews as you drag and records when you release; the alert explains the demo rule that was triggered.
+4. Open **Alerts**, acknowledge the change, add an inspection note, and mark it resolved.
+5. Open **Records**, switch houses, and adjust today's simulated egg count.
+6. Open **Profile** to edit the farm, owner, and house details; reset the data to restart the walkthrough.
+7. Toggle **Simulate offline** to show that the local demo screens remain available.
 
 ## What the demo represents
 
