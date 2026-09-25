@@ -1,8 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Text, TextInput, View, StyleSheet } from 'react-native';
-import { Card, Page, PrimaryButton, Tag, colors } from '../../components';
-import { useDemo, type FarmAlert, type House } from '../../demo';
+import { Card, ComparisonBars, Page, PrimaryButton, Tag, colors } from '../../components';
+import { isAlertConditionActive, useDemo, type FarmAlert, type House } from '../../demo';
 
 export default function AlertDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -18,11 +18,12 @@ function AlertDetails({ alert, house }: { alert: FarmAlert; house: House }) {
   const [note, setNote] = useState(alert.note);
   return <Page title="Alert details" subtitle={`${house.name} · simulated alert`}>
     <Card>
-      <View style={styles.row}><Tag color={alert.status === 'Resolved' ? 'green' : 'amber'}>{alert.status.toUpperCase()}</Tag><Text style={styles.muted}>Demo rule</Text></View>
-      <Text style={styles.heading}>A change needs a closer look</Text>
-      <Text style={styles.body}>Observed change: {alert.observed}.</Text>
-      <Text style={styles.body}>Demo reference: {alert.referenceTemperature.toFixed(1)}°C and movement {alert.referenceMovement}%.</Text>
-      <Text style={styles.body}>Current readings: {alert.temperature.toFixed(1)}°C and movement {alert.movement}%.</Text>
+      <View style={styles.row}><Tag color={alert.status === 'Resolved' ? 'green' : 'amber'}>{alert.status.toUpperCase()}</Tag>{alert.status !== 'Resolved' ? <Tag color={isAlertConditionActive(alert) ? 'amber' : 'green'}>{isAlertConditionActive(alert) ? 'CONDITION ACTIVE' : 'READINGS RECOVERED'}</Tag> : null}</View>
+      <Text style={styles.heading}>{alert.status === 'Resolved' ? 'Inspection record' : 'A change needs a closer look'}</Text>
+      <Text style={styles.body}>The demo rule first observed {alert.observed}. Compare the reference with {alert.status === 'Resolved' ? 'the reading when this record was resolved' : 'the latest recorded reading'}.</Text>
+      <ComparisonBars label="Temperature" reference={alert.referenceTemperature} latest={alert.temperature} minimum={24} maximum={38} suffix="°C" precision={1} latestLabel={alert.status === 'Resolved' ? 'At resolve' : 'Latest'} color={colors.temperature} />
+      <ComparisonBars label="Bird movement" reference={alert.referenceMovement} latest={alert.movement} minimum={0} maximum={100} suffix="%" latestLabel={alert.status === 'Resolved' ? 'At resolve' : 'Latest'} color={colors.movement} />
+      {!isAlertConditionActive(alert) && alert.status !== 'Resolved' ? <Text style={styles.recovered}>Latest readings no longer meet the demo alert rule. The inspection record stays open until you resolve it.</Text> : null}
       <View style={styles.notice}><Text style={styles.noticeText}>Early warning, not a diagnosis. Inspect the area and decide what action to take.</Text></View>
       {alert.status === 'New' && <PrimaryButton title="Acknowledge alert" onPress={() => updateAlert(alert.id, { status: 'Acknowledged' })} />}
       {alert.status !== 'Resolved' && <PrimaryButton title="Mark resolved" onPress={() => updateAlert(alert.id, { status: 'Resolved' })} secondary />}
@@ -37,7 +38,7 @@ function AlertDetails({ alert, house }: { alert: FarmAlert; house: House }) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, muted: { color: colors.muted, fontSize: 11 },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 7 }, muted: { color: colors.muted, fontSize: 11 }, recovered: { color: colors.darkGreen, backgroundColor: colors.paleGreen, padding: 10, borderRadius: 9, fontSize: 12, lineHeight: 18 },
   heading: { color: colors.ink, fontSize: 17, fontWeight: '800' }, body: { color: '#586355', fontSize: 13, lineHeight: 20 },
   notice: { backgroundColor: colors.paleGreen, padding: 12, borderRadius: 11 }, noticeText: { color: colors.darkGreen, fontSize: 12, lineHeight: 19, fontWeight: '600' },
   input: { minHeight: 112, borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 12, fontSize: 14, color: colors.ink, backgroundColor: '#FBFCFA' },

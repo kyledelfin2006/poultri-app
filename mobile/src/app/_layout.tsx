@@ -8,6 +8,7 @@ export default function RootLayout() {
     <Stack screenOptions={{ headerShown: false, animation: 'fade_from_bottom' }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="simulator" />
       <Stack.Screen name="house/[id]" />
       <Stack.Screen name="alert/[id]" />
     </Stack>

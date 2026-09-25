@@ -1,21 +1,22 @@
 import { Link } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
-import { Card, Page, Tag, colors } from '../../components';
-import { useDemo } from '../../demo';
+import { Card, ComparisonBars, Page, Tag, colors } from '../../components';
+import { isAlertConditionActive, useDemo } from '../../demo';
 
 export default function AlertsScreen() {
   const { data, openAlerts } = useDemo();
   return <Page title="Alerts" subtitle={`${openAlerts.length} open · simulated signals`}>
     <Text style={styles.intro}>Alerts describe changes that may need inspection. They do not diagnose.</Text>
-    {data.alerts.length === 0 ? <Card><Tag>NO DEMO ALERTS</Tag><Text style={styles.body}>Use the scenario simulator on Home to create one.</Text></Card> : data.alerts.map((alert) => {
+    {data.alerts.length === 0 ? <Card><Tag>NO DEMO ALERTS</Tag><Text style={styles.body}>Open Simulator from Home to demonstrate a reading that needs inspection.</Text></Card> : data.alerts.map((alert) => {
       const house = data.houses.find((item) => item.id === alert.houseId);
       return <Card key={alert.id}>
-        <View style={styles.row}><Tag color={alert.status === 'Resolved' ? 'green' : 'amber'}>{alert.status.toUpperCase()}</Tag><Text style={styles.muted}>House {house?.name.replace('House ', '')}</Text></View>
-        <Text style={styles.heading}>A change to inspect</Text>
+        <View style={styles.row}><Tag color={alert.status === 'Resolved' ? 'green' : 'amber'}>{alert.status.toUpperCase()}</Tag>{alert.status !== 'Resolved' ? <Tag color={isAlertConditionActive(alert) ? 'amber' : 'green'}>{isAlertConditionActive(alert) ? 'ACTIVE CHANGE' : 'RECOVERED'}</Tag> : null}<Text style={styles.muted}>{house?.name}</Text></View>
+        <Text style={styles.heading}>{alert.status === 'Resolved' ? 'Inspection record' : 'A change to inspect'}</Text>
         <Text style={styles.body}>{alert.observed}</Text>
-        <Text style={styles.muted}>{alert.temperature.toFixed(1)}°C · movement {alert.movement}%</Text>
+        <ComparisonBars label="Temperature" reference={alert.referenceTemperature} latest={alert.temperature} minimum={24} maximum={38} suffix="°C" precision={1} latestLabel={alert.status === 'Resolved' ? 'At resolve' : 'Latest'} color={colors.temperature} />
+        <ComparisonBars label="Movement" reference={alert.referenceMovement} latest={alert.movement} minimum={0} maximum={100} suffix="%" latestLabel={alert.status === 'Resolved' ? 'At resolve' : 'Latest'} color={colors.movement} />
         {alert.note ? <Text style={styles.notePreview}>Inspection note: {alert.note}</Text> : null}
-        <Link href={{ pathname: '/alert/[id]', params: { id: alert.id } }} asChild><Pressable style={styles.button}><Text style={styles.buttonText}>Review alert</Text></Pressable></Link>
+        <Link href={{ pathname: '/alert/[id]', params: { id: alert.id } }} asChild><Pressable accessibilityRole="button" accessibilityLabel={`Review ${house?.name ?? 'poultry house'} alert`} style={styles.button}><Text style={styles.buttonText}>Review alert</Text></Pressable></Link>
       </Card>;
     })}
     <Card style={styles.notice}><Text style={styles.noticeText}>Poultri helps the farmer decide where to look. Inspect the house and decide what action to take.</Text></Card>
@@ -23,7 +24,7 @@ export default function AlertsScreen() {
 }
 
 const styles = {
-  row: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const },
+  row: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const, flexWrap: 'wrap' as const, gap: 7 },
   intro: { color: colors.muted, fontSize: 13, lineHeight: 19 },
   body: { color: '#586355', fontSize: 13, lineHeight: 20 },
   muted: { color: colors.muted, fontSize: 11 },

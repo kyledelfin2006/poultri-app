@@ -82,29 +82,36 @@ function initialData(): DemoData {
   };
 }
 
-function addReading(data: DemoData, signal: Omit<Signal, 'step'>): DemoData {
+function commitReading(data: DemoData, reading: Signal): DemoData {
   const house = data.houses.find((item) => item.id === HOUSE_ID);
   if (!house) return data;
 
-  const reading = { ...signal, step: house.readings.at(-1)!.step + 1 };
   const nextHouse = { ...house, readings: [...house.readings.slice(-11), reading] };
   const temperatureRise = reading.temperature - house.reference.temperature;
   const movementDrop = house.reference.movement - reading.movement;
+  const previousReading = house.readings.at(-1);
+  const wasConditionActive = previousReading ? meetsDemoRule(previousReading.temperature, previousReading.movement, house.reference.temperature, house.reference.movement) : false;
   const observed: string[] = [];
   if (temperatureRise >= TEMPERATURE_RISE_THRESHOLD) observed.push(`temperature rose ${temperatureRise.toFixed(1)}°C from its demo reference`);
   if (movementDrop >= MOVEMENT_DROP_THRESHOLD) observed.push(`movement dropped ${movementDrop} points from its demo reference`);
 
   const openAlert = data.alerts.find((alert) => alert.houseId === HOUSE_ID && alert.status !== 'Resolved');
   let alerts = data.alerts;
-  if (observed.length && openAlert) {
+  if (openAlert) {
     alerts = data.alerts.map((alert) => alert.id === openAlert.id
-      ? { ...alert, observed: observed.join(' while '), temperature: reading.temperature, movement: reading.movement, referenceTemperature: house.reference.temperature, referenceMovement: house.reference.movement }
+      ? { ...alert, observed: observed.length ? observed.join(' while ') : alert.observed, temperature: reading.temperature, movement: reading.movement, referenceTemperature: house.reference.temperature, referenceMovement: house.reference.movement }
       : alert);
-  } else if (observed.length) {
+  } else if (observed.length && !wasConditionActive) {
     alerts = [{ id: `alert-${Date.now()}`, houseId: HOUSE_ID, status: 'New', observed: observed.join(' while '), temperature: reading.temperature, movement: reading.movement, referenceTemperature: house.reference.temperature, referenceMovement: house.reference.movement, note: '' }, ...data.alerts];
   }
 
   return { ...data, houses: data.houses.map((item) => item.id === HOUSE_ID ? nextHouse : item), alerts };
+}
+
+function addReading(data: DemoData, signal: Omit<Signal, 'step'>): DemoData {
+  const house = data.houses.find((item) => item.id === HOUSE_ID);
+  if (!house) return data;
+  return commitReading(data, { ...signal, step: (house.readings.at(-1)?.step ?? -1) + 1 });
 }
 
 type DemoContextValue = {
@@ -142,10 +149,15 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     ready,
     openAlerts: data.alerts.filter((alert) => alert.status !== 'Resolved'),
     selectScenario: (scenario) => setData((current) => {
-      let next = { ...current, scenario, scenarioStep: 0 };
-      if (scenario === 'Recovery') next = addReading(next, { temperature: 32.6, humidity: 72, movement: 52 });
-      else next = addReading(next, current.houses.find((house) => house.id === HOUSE_ID)!.reference);
-      return next;
+      const house = current.houses.find((item) => item.id === HOUSE_ID)!;
+      const next = {
+        ...current,
+        scenario,
+        scenarioStep: 0,
+        houses: current.houses.map((item) => item.id === HOUSE_ID ? { ...item, readings: [] } : item),
+      };
+      const firstReading = scenario === 'Recovery' ? { temperature: 32.6, humidity: 72, movement: 52 } : house.reference;
+      return commitReading(next, { ...firstReading, step: 0 });
     }),
     advanceScenario: () => setData((current) => {
       const nextSignal = SCENARIOS[current.scenario][current.scenarioStep];
@@ -176,9 +188,11 @@ export function useDemo() {
 }
 
 export const scenarios = Object.keys(SCENARIOS) as Scenario[];
+const meetsDemoRule = (temperature: number, movement: number, referenceTemperature: number, referenceMovement: number) =>
+  temperature - referenceTemperature >= TEMPERATURE_RISE_THRESHOLD || referenceMovement - movement >= MOVEMENT_DROP_THRESHOLD;
+
+export const isAlertConditionActive = (alert: FarmAlert) => meetsDemoRule(alert.temperature, alert.movement, alert.referenceTemperature, alert.referenceMovement);
 export const getHouseStatus = (house: House) => {
   const latest = house.readings.at(-1)!;
-  return latest.temperature - house.reference.temperature >= TEMPERATURE_RISE_THRESHOLD || house.reference.movement - latest.movement >= MOVEMENT_DROP_THRESHOLD
-    ? 'Needs inspection'
-    : 'Normal';
+  return meetsDemoRule(latest.temperature, latest.movement, house.reference.temperature, house.reference.movement) ? 'Needs inspection' : 'Normal';
 };

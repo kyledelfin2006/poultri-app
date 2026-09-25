@@ -46,12 +46,13 @@ The `preview` profile in `mobile/eas.json` is configured to create an installabl
 ## Demo walkthrough
 
 1. Continue from the branded welcome screen into the demo farm.
-2. On **Home**, select **Temperature rising** or **Movement dropping**, then advance the scenario step by step. Watch the chart, house status, and alert update.
-3. Use the House 2 sliders to create a custom example. The value previews as you drag and records when you release; the alert explains the demo rule that was triggered.
-4. Open **Alerts**, acknowledge the change, add an inspection note, and mark it resolved.
-5. Open **Records**, switch houses, and adjust today's simulated egg count.
-6. Open **Profile** to edit the farm, owner, and house details; reset the data to restart the walkthrough.
-7. Toggle **Simulate offline** to show that the local demo screens remain available.
+2. On **Home**, open **Simulator**. The page begins with a notice that readings are local demo inputs and that Raspberry Pi/IoT ingestion is intended for a deployed system, but is not connected in this prototype.
+3. Select **Temperature rising** or **Movement dropping**, then advance the scenario step by step. Watch the Simulator, Home, house detail, and alert visuals respond to the same shared readings.
+4. Open the alert, acknowledge it, and save an inspection note. Return to Simulator, choose **Recovery**, and advance the steps. Confirm that readings recover while the alert and note remain available, then resolve the record from Alerts.
+5. Use the Simulator sliders to create a custom temperature, humidity, movement, or egg-production example. Values preview while dragging and update the relevant dashboards when released.
+6. Open **Records** and switch houses to view the seven-day illustrative production charts. The egg total edited in Simulator appears there.
+7. Open **Profile** to edit the farm, owner, and house details; reset the data to restart the walkthrough.
+8. Toggle **Simulate offline** to show that the local demo screens remain available.
 
 ## Demo limitations
 

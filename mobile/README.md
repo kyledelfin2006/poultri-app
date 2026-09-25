@@ -24,9 +24,12 @@ The `preview` profile is configured for an installable APK. An Expo account and 
 ## Walkthrough
 
 - The welcome screen opens the local demo without real authentication.
-- Home has four step-through scenarios, accessible scenario choices, and House 2 sliders that preview values while dragging and update linked trends/alerts on release.
+- Home is a color-coded dashboard with house status bars, alert state, farm totals, and a clear route into Simulator.
+- Simulator has the four step-through scenarios, custom House 2 signal and egg-production sliders, and a warning that Raspberry Pi/IoT input is planned for deployment but is not connected here.
+- Simulator changes update relevant Home, house, alert, and production views through the same saved local demo data.
 - Alerts support acknowledgement, resolution, and a saved inspection note.
-- Records are filterable by house; today's demo egg count is editable.
+- Alerts compare reference and latest readings; recovered readings remain visible while an inspection record is still open.
+- Records are filterable by house and show illustrative seven-day production charts. Edit today's demo egg count in Simulator.
 - Profile edits the farm, owner, house names and bird counts, and can reset demo data.
 
 All data is labeled as demo data. The warning is for inspection and is not a diagnosis.
