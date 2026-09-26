@@ -6,9 +6,15 @@ For the complete Expo Go setup, APK build steps, and demo walkthrough, see the r
 
 ## Run with Expo Go
 
-1. Install Node.js LTS and Expo Go on an Android phone.
-2. In this folder, run `npm install` once, then `npx expo start`.
-3. Scan the terminal QR code with Expo Go. Keep the phone and computer on the same Wi-Fi network.
+1. Install Node.js LTS on your computer and Expo Go on an Android phone.
+2. Open PowerShell in this folder and run:
+
+   ```powershell
+   npm install
+   npx expo start
+   ```
+
+3. Keep the phone and computer on the same Wi-Fi network. In Expo Go, scan the QR code shown in the terminal.
 
 Expo Go is convenient for development demonstrations. For a shareable APK, build and install the standalone app below.
 
@@ -22,20 +28,20 @@ Expo Go is convenient for development demonstrations. For a shareable APK, build
    npx eas-cli@latest login
    ```
 
-3. Link this app to your Expo account once:
+3. If `app.json` does not already contain `extra.eas.projectId`, link this app once:
 
    ```bash
    npx eas-cli@latest init
    ```
 
-   This creates or links the cloud project and writes its project ID into `app.json`.
+   This creates or links the cloud project and writes its project ID into `app.json`. Skip this step if the project ID is already there.
 4. Create the APK:
 
    ```bash
    npm run build:apk
    ```
 
-5. When the cloud build completes, open its build link on the Android phone and install the `.apk`.
+5. When the cloud build completes, open its build page. Under **Build artifact**, select **Install** to show a QR code. Scan it with the Android phone camera, open the link, then tap **Install** on the page to download the APK. Confirm Android's install prompt; Android may ask you to allow installs from that browser.
 
 The `build:apk` script uses the `preview` profile, which is configured for an installable APK. EAS CLI runs on demand through `npx`; it is not an app dependency. An Expo account and network access are required for the hosted build. This repository does not contain a built APK or signing credentials.
 

@@ -20,6 +20,13 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3f8cad76-4690-4a37-a65d-a4b1563beec9"
+      }
+    },
+    "owner": "kylehatestheworld"
   }
 }

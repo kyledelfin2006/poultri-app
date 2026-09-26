@@ -10,7 +10,7 @@ The prototype uses local simulated readings and production records. It does not 
 
 This is the quickest way to try the app while developing. You need Node.js LTS on your computer and Expo Go on an Android phone.
 
-1. Open a terminal in the repository folder and run:
+1. Open PowerShell in the repository folder and run:
 
    ```powershell
    cd mobile
@@ -19,7 +19,7 @@ This is the quickest way to try the app while developing. You need Node.js LTS o
    ```
 
 2. Connect the phone and computer to the same Wi-Fi network.
-3. Open Expo Go on the phone and scan the QR code shown in the terminal.
+3. Open Expo Go on the Android phone and scan the QR code shown in the terminal.
 
 Keep `npx expo start` running while using Expo Go. The phone must be able to reach the development server.
 
@@ -28,7 +28,7 @@ Keep `npx expo start` running while using Expo Go. The phone must be able to rea
 An APK runs as a standalone app and is suitable for a mentor or business-partner demo. EAS Build creates it online, so you need internet access and an Expo account.
 
 1. Install Node.js LTS and create or sign in to an Expo account at [expo.dev](https://expo.dev/).
-2. In a terminal at the repository folder, run:
+2. Open PowerShell in the repository folder and run:
 
    ```powershell
    cd mobile
@@ -36,20 +36,20 @@ An APK runs as a standalone app and is suitable for a mentor or business-partner
    npx eas-cli@latest login
    ```
 
-3. Link the mobile app to your Expo account once:
+3. If `mobile/app.json` does not already contain `extra.eas.projectId`, link the app once:
 
    ```powershell
    npx eas-cli@latest init
    ```
 
-   This creates or links the cloud project and writes its project ID into `mobile/app.json`.
+   This creates or links the cloud project and writes its project ID into `mobile/app.json`. Skip this step if the project ID is already there.
 4. Build the APK from `mobile/`:
 
    ```powershell
    npm run build:apk
    ```
 
-5. When the cloud build finishes, open its link on the Android phone and download/install the APK. Android may ask you to allow installation from that browser or file manager.
+5. When the cloud build finishes, open its build page. Under **Build artifact**, select **Install** to show the QR code. Scan it with the Android phone camera, open the link, then tap **Install** on the page to download the APK. Confirm Android's install prompt; Android may ask you to allow installs from that browser.
 
 The `build:apk` script runs the latest EAS CLI on demand, so no global install is needed. The `preview` profile in `mobile/eas.json` is configured to create an installable APK. No APK or signing credentials are checked into this repository.
 
