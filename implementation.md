@@ -2,7 +2,7 @@
 
 ## Later desktop simulator extension
 
-This brief describes the original local-only mobile demo. The later, user-approved [desktop IoT Simulator](desktop-simulator/README.md) adds a separate browser farm sandbox, a trusted-LAN reading connection, and Android system push notifications. Its documented Firebase/FCM setup and APK are required for physical push delivery. The original references below to excluding servers and notifications describe the earlier scope, not the current extension. All readings and alerts remain simulated and the rule remains illustrative and unvalidated.
+This brief describes the original local-only mobile demo. The later, user-approved [desktop IoT Simulator](desktop-simulator/README.md) adds a separate browser farm sandbox, a trusted-LAN reading connection, and Android system push notifications. Firebase/FCM is configured; a new APK and physical phone test are still required to verify delivery. The original references below to excluding servers and notifications describe the earlier scope, not the current extension. All readings and alerts remain simulated and the rule remains illustrative and unvalidated.
 
 ## Objective
 

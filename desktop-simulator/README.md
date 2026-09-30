@@ -1,6 +1,6 @@
 # Poultri IoT Simulator
 
-This browser sandbox represents a **simulated** three-house farm. It uses the supplied Poultri logo and wordmark, and sends example readings over local Wi-Fi to the existing mobile app. The desktop server checks the same illustrative, unvalidated temperature/movement rule and creates inspection alerts. It can submit real Android system pushes through Expo once Firebase credentials and a new APK are configured.
+This browser sandbox represents a **simulated** three-house farm. It uses the supplied Poultri logo and wordmark, and sends example readings over local Wi-Fi to the existing mobile app. The desktop server checks the same illustrative, unvalidated temperature/movement rule and creates inspection alerts. Firebase/FCM is configured for Expo pushes; install a new APK to test them on Android.
 
 ## What changed
 
@@ -9,14 +9,11 @@ This browser sandbox represents a **simulated** three-house farm. It uses the su
 - The mobile app pairs with a temporary six-digit code, follows desktop readings, merges desktop alerts by ID, and opens a matching alert when a system notification is tapped. The on-phone Simulator still works independently.
 - Suggestions ask the user to verify readings and inspect the house. They are demo prompts, not diagnoses or treatment advice. SMS, sensors, cameras, and a Raspberry Pi are not included.
 
-## One-time Android push setup
+## Android push setup
 
-Desktop-to-mobile readings work without Firebase. **Actual Android system notifications need these one-time steps**:
+Desktop-to-mobile readings work without Firebase. The Firebase project `poultri-demo-2026-0930` has Android app `com.poultri.mobile` registered and FCM v1 enabled. Its `google-services.json` is in `mobile/`, where `mobile/app.config.js` includes it in the Android build. The FCM v1 service-account key is assigned to the existing Poultri EAS project. The private key is not stored in this repository.
 
-1. Use the existing Expo/EAS project in `mobile/app.json` and create a Firebase project. Register an Android app with package name `com.poultri.mobile`.
-2. Download that Firebase app's `google-services.json` into `mobile/`. The included `mobile/app.config.js` detects the file and sets `expo.android.googleServicesFile` automatically. This project-specific file is not provided in this repository.
-3. In Firebase, generate an FCM v1 service-account private key. Upload it to this Expo project's **Android FCM V1 credentials** through EAS credentials or the Expo dashboard. **Keep the service-account JSON private; never commit it.**
-4. From `mobile/`, run `npm install`, sign in with `npx eas-cli@latest login`, and run `npm run build:apk`. Install this new APK on a physical Android phone and allow Poultri notifications. Expo Go is useful for the local demo but is not the push test build.
+From `mobile/`, run `npm install`, sign in with `npx eas-cli@latest login`, and run `npm run build:apk`. Install the new APK on a physical Android phone and allow Poultri notifications. Expo Go is useful for the local demo but is not the push test build.
 
 See [Expo's Android FCM setup](https://docs.expo.dev/push-notifications/fcm-credentials/) and [push setup](https://docs.expo.dev/push-notifications/push-notifications-setup/) for the current credential steps. Push needs internet on the computer and phone, even though readings use Wi-Fi locally. Expo/FCM acceptance is not proof that Android displayed the notification.
 

@@ -16,7 +16,7 @@ For the complete Expo Go setup, APK build steps, and demo walkthrough, see the r
 
 3. Keep the phone and computer on the same Wi-Fi network. In Expo Go, scan the QR code shown in the terminal.
 
-Expo Go is convenient for development demonstrations. Actual Android system notifications from the desktop simulator require a new EAS APK with Firebase/FCM configured; see [one-time setup](../desktop-simulator/README.md#one-time-android-push-setup).
+Expo Go is convenient for development demonstrations. Actual Android system notifications from the desktop simulator require a new EAS APK; Firebase/FCM is [configured](../desktop-simulator/README.md#android-push-setup).
 
 ## Build an Android APK
 
@@ -35,7 +35,7 @@ Expo Go is convenient for development demonstrations. Actual Android system noti
    ```
 
    This creates or links the cloud project and writes its project ID into `app.json`. Skip this step if the project ID is already there.
-4. To receive Android system notifications, first complete the [Firebase/FCM setup](../desktop-simulator/README.md#one-time-android-push-setup). Create the APK:
+4. To receive Android system notifications, build an APK with the [Firebase/FCM configuration](../desktop-simulator/README.md#android-push-setup):
 
    ```bash
    npm run build:apk

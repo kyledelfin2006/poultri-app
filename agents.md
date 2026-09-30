@@ -4,7 +4,7 @@
 
 The repository includes an Expo / React Native TypeScript mobile demonstrator in `mobile/`, on the `main` branch. It is intended for Expo Go demos and an installable Android APK built with EAS. The official icon and wordmark are now used from the supplied `assets/` files.
 
-The current mobile code passes Expo lint and TypeScript checks. An Android JavaScript export with `--no-bytecode` passes; this verifies the bundle, not a native APK. No APK has been produced for this extension. The desktop browser sandbox and Node server live in `desktop-simulator/`. Actual Android notification delivery still requires Firebase/FCM credentials, a new EAS APK, and a physical phone check.
+The current mobile code passes Expo lint and TypeScript checks. An Android JavaScript export with `--no-bytecode` passes; this verifies the bundle, not a native APK. The desktop browser sandbox and Node server live in `desktop-simulator/`. Firebase project `poultri-demo-2026-0930` has the Android app registered, `mobile/google-services.json` is included in the Expo config, and EAS has the FCM v1 service-account key assigned. Actual Android notification delivery still requires a new APK installed on a physical phone and a device check.
 
 ## Concept MVP assessment
 
@@ -15,7 +15,7 @@ The current mobile code passes Expo lint and TypeScript checks. An Android JavaS
 | Temperature and humidity monitoring | Shown on overview and house details | Simulated; no sensors connected |
 | Camera activity and existing-camera compatibility | Camera state is described as simulated | UI concept only; no camera input, stream, or vision processing |
 | Farm production records | Seven-day egg production charts, per-house comparison, and Simulator input | Demonstrated with illustrative records |
-| Alert review and farmer response | Reference/latest visual comparison, active/recovered cue, acknowledge, note, and resolve actions; desktop alerts can be submitted to Expo Push | Alert interaction demonstrated; physical Android push delivery awaits Firebase/FCM configuration and APK verification |
+| Alert review and farmer response | Reference/latest visual comparison, active/recovered cue, acknowledge, note, and resolve actions; desktop alerts can be submitted to Expo Push | Alert interaction demonstrated; Firebase/FCM configured, physical Android push delivery awaits APK and phone verification |
 | Operation during unreliable internet | Local data plus a simulate-offline indicator and control | App flow is local; seven-day offline endurance is unvalidated |
 | On-site processing | Explained on Profile screen as an intended capability | Not implemented; there is no edge device or processing pipeline |
 | Proposed ₱40,000 package and separate subscription | Clearly labeled proposed pricing | Presentation only; no sales or billing flow |
@@ -26,7 +26,7 @@ The current mobile code passes Expo lint and TypeScript checks. An Android JavaS
 
 ### MVP conclusion
 
-This build covers the product's core *demonstration MVP*: a branded welcome/profile flow, visual farm dashboards, a dedicated shared-state simulator, a browser farm sandbox, rule-triggered warning demonstrations, inspection notes, production history, and a basic offline walkthrough. The browser server can submit system pushes, but physical Android delivery remains unverified until Firebase/FCM setup and APK testing. It does not meet the deployable *farm monitoring MVP*: inputs and alert rules are simulated, the rule is not validated, and there is no on-site processing or field result. Do not describe simulated functionality as a working hardware system.
+This build covers the product's core *demonstration MVP*: a branded welcome/profile flow, visual farm dashboards, a dedicated shared-state simulator, a browser farm sandbox, rule-triggered warning demonstrations, inspection notes, production history, and a basic offline walkthrough. The browser server can submit system pushes, but physical Android delivery remains unverified until APK and phone testing. It does not meet the deployable *farm monitoring MVP*: inputs and alert rules are simulated, the rule is not validated, and there is no on-site processing or field result. Do not describe simulated functionality as a working hardware system.
 
 ## Demo path
 

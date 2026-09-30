@@ -4,7 +4,7 @@ Poultri is a proposed low-cost early-warning monitoring system for layer farms. 
 
 The prototype uses local simulated readings and production records. It does not diagnose, connect to real cameras or sensors, or implement on-site processing.
 
-The [desktop browser IoT Simulator](desktop-simulator/README.md) provides a playable three-house farm sandbox. It sends simulated readings to the app over a trusted local Wi-Fi network. Desktop alerts can also produce Android system notifications after Firebase/FCM credentials are configured and a new APK is installed. This remains demo data, not connected IoT hardware.
+The [desktop browser IoT Simulator](desktop-simulator/README.md) provides a playable three-house farm sandbox. It sends simulated readings to the app over a trusted local Wi-Fi network. Firebase/FCM is configured for Android pushes; install a new APK to test notifications on a phone. This remains demo data, not connected IoT hardware.
 
 ## Run the demo
 
@@ -45,7 +45,7 @@ An APK runs as a standalone app and is suitable for a mentor or business-partner
    ```
 
    This creates or links the cloud project and writes its project ID into `mobile/app.json`. Skip this step if the project ID is already there.
-4. For the IoT Simulator's Android system notifications, first complete the [Firebase/FCM setup](desktop-simulator/README.md#one-time-android-push-setup). Then build the APK from `mobile/`:
+4. For the IoT Simulator's Android system notifications, use the [configured Firebase/FCM project](desktop-simulator/README.md#android-push-setup). Build the APK from `mobile/`:
 
    ```powershell
    npm run build:apk
