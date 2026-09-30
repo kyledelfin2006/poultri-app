@@ -1,6 +1,6 @@
 # Poultri mobile demo
 
-Expo / React Native app for demonstrating Poultri's early-warning experience with simulated farm data. It works locally and does not connect to cameras, sensors, or a server.
+Expo / React Native app for demonstrating Poultri's early-warning experience with simulated farm data. It can connect to the separate local desktop simulator; it does not connect to cameras, sensors, or deployed farm hardware.
 
 For the complete Expo Go setup, APK build steps, and demo walkthrough, see the repository [README](../README.md#run-the-demo).
 
@@ -16,7 +16,7 @@ For the complete Expo Go setup, APK build steps, and demo walkthrough, see the r
 
 3. Keep the phone and computer on the same Wi-Fi network. In Expo Go, scan the QR code shown in the terminal.
 
-Expo Go is convenient for development demonstrations. For a shareable APK, build and install the standalone app below.
+Expo Go is convenient for development demonstrations. Actual Android system notifications from the desktop simulator require a new EAS APK with Firebase/FCM configured; see [one-time setup](../desktop-simulator/README.md#one-time-android-push-setup).
 
 ## Build an Android APK
 
@@ -35,7 +35,7 @@ Expo Go is convenient for development demonstrations. For a shareable APK, build
    ```
 
    This creates or links the cloud project and writes its project ID into `app.json`. Skip this step if the project ID is already there.
-4. Create the APK:
+4. To receive Android system notifications, first complete the [Firebase/FCM setup](../desktop-simulator/README.md#one-time-android-push-setup). Create the APK:
 
    ```bash
    npm run build:apk
@@ -50,10 +50,11 @@ The `build:apk` script uses the `preview` profile, which is configured for an in
 - The welcome screen opens the local demo without real authentication.
 - Home is a color-coded dashboard with house status bars, alert state, farm totals, and a clear route into Simulator.
 - Simulator has the four step-through scenarios, custom House 2 signal and egg-production sliders, and a warning that Raspberry Pi/IoT input is planned for deployment but is not connected here.
+- Simulator can pair with the [desktop browser IoT Simulator](../desktop-simulator/README.md) over a trusted local Wi-Fi network. Readings remain simulated. With notification permission and the configured Android APK, a new desktop alert also produces an Android system notification; tapping it opens the matching alert.
 - Simulator changes update relevant Home, house, alert, and production views through the same saved local demo data.
 - Alerts support acknowledgement, resolution, and a saved inspection note.
 - Alerts compare reference and latest readings; recovered readings remain visible while an inspection record is still open.
 - Records are filterable by house and show illustrative seven-day production charts. Edit today's demo egg count in Simulator.
 - Profile edits the farm, owner, house names and bird counts, and can reset demo data.
 
-All data is labeled as demo data. The warning is for inspection and is not a diagnosis.
+All data is labeled as demo data. The warning and suggested checks are for inspection and are not a diagnosis or treatment. The mobile app also keeps its local scenario controls when the desktop server is disconnected. A push needs internet and Expo/FCM; the desktop only reports submission/provider status, not confirmed phone display.

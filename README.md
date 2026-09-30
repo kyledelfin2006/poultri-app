@@ -4,6 +4,8 @@ Poultri is a proposed low-cost early-warning monitoring system for layer farms. 
 
 The prototype uses local simulated readings and production records. It does not diagnose, connect to real cameras or sensors, or implement on-site processing.
 
+The [desktop browser IoT Simulator](desktop-simulator/README.md) provides a playable three-house farm sandbox. It sends simulated readings to the app over a trusted local Wi-Fi network. Desktop alerts can also produce Android system notifications after Firebase/FCM credentials are configured and a new APK is installed. This remains demo data, not connected IoT hardware.
+
 ## Run the demo
 
 ### Expo Go
@@ -21,7 +23,7 @@ This is the quickest way to try the app while developing. You need Node.js LTS o
 2. Connect the phone and computer to the same Wi-Fi network.
 3. Open Expo Go on the Android phone and scan the QR code shown in the terminal.
 
-Keep `npx expo start` running while using Expo Go. The phone must be able to reach the development server.
+Keep `npx expo start` running while using Expo Go. The phone must be able to reach the development server. Use the EAS APK and [Android push setup](desktop-simulator/README.md#one-time-android-push-setup) to demonstrate actual system notifications; Expo Go is not the push test build.
 
 ### Build and install an Android APK
 
@@ -43,7 +45,7 @@ An APK runs as a standalone app and is suitable for a mentor or business-partner
    ```
 
    This creates or links the cloud project and writes its project ID into `mobile/app.json`. Skip this step if the project ID is already there.
-4. Build the APK from `mobile/`:
+4. For the IoT Simulator's Android system notifications, first complete the [Firebase/FCM setup](desktop-simulator/README.md#one-time-android-push-setup). Then build the APK from `mobile/`:
 
    ```powershell
    npm run build:apk
@@ -64,9 +66,13 @@ The `build:apk` script runs the latest EAS CLI on demand, so no global install i
 7. Open **Profile** to edit the farm, owner, and house details; reset the data to restart the walkthrough.
 8. Toggle **Simulate offline** to show that the local demo screens remain available.
 
+### Desktop IoT Simulator and Android notification demo
+
+Follow the [desktop startup and demo walkthrough](desktop-simulator/README.md#start-each-session). In brief: run `npm start` in `desktop-simulator/`, open `http://localhost:4174`, pair the phone from the mobile **Simulator** screen using the displayed network address and code, then change a house condition. Readings use local Wi-Fi. Real Android notifications require the newly built APK, notification permission, internet, and configured Expo/FCM credentials.
+
 ## Demo limitations
 
-The app uses local simulated readings and production records. It does not connect to cameras or sensors and does not implement on-site processing. The offline control is a demonstration setting; it does not prove the concept note's seven-day offline validation target. All alerts are inspection prompts, not diagnoses.
+The app uses simulated readings and production records. It does not connect to cameras or sensors and does not implement on-site processing. The offline control is a demonstration setting; it does not prove the concept note's seven-day offline validation target. All alerts are inspection prompts, not diagnoses. Push delivery depends on Expo/FCM and internet; a submitted push is not confirmation that the phone displayed it.
 
 ## More information
 

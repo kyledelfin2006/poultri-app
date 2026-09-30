@@ -25,6 +25,7 @@ function AlertDetails({ alert, house }: { alert: FarmAlert; house: House }) {
       <ComparisonBars label="Bird movement" reference={alert.referenceMovement} latest={alert.movement} minimum={0} maximum={100} suffix="%" latestLabel={alert.status === 'Resolved' ? 'At resolve' : 'Latest'} color={colors.movement} />
       {!isAlertConditionActive(alert) && alert.status !== 'Resolved' ? <Text style={styles.recovered}>Latest readings no longer meet the demo alert rule. The inspection record stays open until you resolve it.</Text> : null}
       <View style={styles.notice}><Text style={styles.noticeText}>Early warning, not a diagnosis. Inspect the area and decide what action to take.</Text></View>
+      {alert.suggestions?.length ? <View style={styles.suggestions}><Text style={styles.suggestionsTitle}>Demo inspection suggestions</Text>{alert.suggestions.map((suggestion) => <Text key={suggestion} style={styles.body}>• {suggestion}</Text>)}<Text style={styles.suggestionsCaption}>Illustrative prompts only; not a diagnosis or treatment advice.</Text></View> : null}
       {alert.status === 'New' && <PrimaryButton title="Acknowledge alert" onPress={() => updateAlert(alert.id, { status: 'Acknowledged' })} />}
       {alert.status !== 'Resolved' && <PrimaryButton title="Mark resolved" onPress={() => updateAlert(alert.id, { status: 'Resolved' })} secondary />}
     </Card>
@@ -41,5 +42,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 7 }, muted: { color: colors.muted, fontSize: 11 }, recovered: { color: colors.darkGreen, backgroundColor: colors.paleGreen, padding: 10, borderRadius: 9, fontSize: 12, lineHeight: 18 },
   heading: { color: colors.ink, fontSize: 17, fontWeight: '800' }, body: { color: '#586355', fontSize: 13, lineHeight: 20 },
   notice: { backgroundColor: colors.paleGreen, padding: 12, borderRadius: 11 }, noticeText: { color: colors.darkGreen, fontSize: 12, lineHeight: 19, fontWeight: '600' },
+  suggestions: { backgroundColor: '#FFF8EB', padding: 12, borderRadius: 11, gap: 5 }, suggestionsTitle: { color: colors.ink, fontSize: 13, fontWeight: '800' }, suggestionsCaption: { color: colors.muted, fontSize: 11, lineHeight: 16 },
   input: { minHeight: 112, borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 12, fontSize: 14, color: colors.ink, backgroundColor: '#FBFCFA' },
 });

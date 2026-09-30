@@ -1,5 +1,9 @@
 # Poultri mobile prototype implementation brief
 
+## Later desktop simulator extension
+
+This brief describes the original local-only mobile demo. The later, user-approved [desktop IoT Simulator](desktop-simulator/README.md) adds a separate browser farm sandbox, a trusted-LAN reading connection, and Android system push notifications. Its documented Firebase/FCM setup and APK are required for physical push delivery. The original references below to excluding servers and notifications describe the earlier scope, not the current extension. All readings and alerts remain simulated and the rule remains illustrative and unvalidated.
+
 ## Objective
 
 Maintain a polished Expo / React Native demonstrator for Poultri. Mentors and business partners should be able to explore the main product idea using Expo Go or an installable Android APK, with no account, backend, camera, or farm hardware.
@@ -10,7 +14,7 @@ This app is a local simulation. Keep that clear anywhere a reading, alert, or re
 
 - Treat concept-note accuracy, response-time, offline-duration, and field-trial numbers as targets to validate, never as achieved results.
 - Describe the ₱40,000 installation package and separate subscription as proposed pricing.
-- Keep cameras, sensors, edge processing, cloud sync, accounts, notifications, payments, and farm trials out until evidence or infrastructure exists.
+- Keep cameras, sensors, edge processing, cloud sync, accounts, payments, and farm trials out until evidence or infrastructure exists. The approved desktop demo adds push notifications for simulated alerts.
 - Keep the local demo useful without implying that a hardware monitoring MVP exists.
 
 ## Demonstration MVP
@@ -25,7 +29,7 @@ The existing mobile app in `mobile/` is the scope to maintain:
 - Color-coded alert list and detail with reference/latest comparisons, active or recovered condition, acknowledgement, resolution, and a saved inspection note.
 - Read-only Records view for selecting a house and viewing seven illustrative days of production. Today's egg total is edited on Simulator.
 - Profile for local farm, owner, house, and bird-count edits; offline demonstration toggle; data reset; proposal and validation context.
-- Local persistence on the device. No network service is required after installation.
+- Local persistence on the device. The on-phone demo remains usable without a network service; desktop readings require the local simulator server.
 
 Do not add product features speculatively. Prefer a direct screen or native control to a new abstraction or dependency. Retain a library only when it provides an active user-facing capability that Expo / React Native does not already provide.
 
@@ -55,7 +59,7 @@ Do not add product features speculatively. Prefer a direct screen or native cont
 
 ## Run and delivery
 
-- Use the existing Expo Router / TypeScript app structure and dependencies. Avoid a server and avoid adding dependencies for one-off UI details.
+- Use the existing Expo Router / TypeScript app structure. Keep the approved local simulator server separate in `desktop-simulator/`; avoid dependencies for one-off UI details.
 - For Expo Go: from `mobile/`, run `npm install` and `npx expo start`; scan the QR code on the same network.
 - For an installable APK: use the EAS `preview` profile in `mobile/eas.json`, which must produce an APK rather than an app bundle. State clearly if no hosted APK build has been produced.
 - Follow the root `README.md` for Expo Go setup, APK build steps, and the presenter walkthrough; use `mobile/README.md` for app-specific details.
@@ -63,4 +67,4 @@ Do not add product features speculatively. Prefer a direct screen or native cont
 
 ## Out of scope
 
-Live cameras or computer vision; physical sensor connections; calibrated poultry-health rules; cloud accounts and synchronization; push notifications; billing; deployment; validated impact claims; and field trials.
+Live cameras or computer vision; physical sensor connections; calibrated poultry-health rules; cloud accounts and synchronization; billing; deployment; validated impact claims; and field trials. Android push for simulated desktop alerts is an approved demonstration feature.

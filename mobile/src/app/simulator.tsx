@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Card, Page, PrimaryButton, SignalSlider, Tag, TrendChart, colors } from '../components';
 import { RULE_EXPLANATION, getHouseStatus, scenarios, useDemo } from '../demo';
 
@@ -11,7 +12,10 @@ const scenarioCopy = {
 } as const;
 
 export default function SimulatorScreen() {
-  const { data, selectScenario, advanceScenario, setSignal, setEggs } = useDemo();
+  const { data, selectScenario, advanceScenario, setSignal, setEggs, desktopUrl, pairingCode, desktopStatus, pushStatus, connectDesktop, disconnectDesktop } = useDemo();
+  const [serverAddress, setServerAddress] = useState<string | null>(null);
+  const [code, setCode] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState('');
   const house = data.houses.find((item) => item.id === 'house-2')!;
   const latest = house.readings.at(-1)!;
 
@@ -19,6 +23,27 @@ export default function SimulatorScreen() {
     <Card style={styles.notice}>
       <Tag color="amber">DEMO INPUT · SIMULATION ONLY</Tag>
       <Text style={styles.noticeText}>These readings are entered locally for demonstration. A deployed Poultri system is intended to receive data from a Raspberry Pi and connected IoT devices. This prototype is not connected to that hardware.</Text>
+    </Card>
+    <Card>
+      <View style={styles.sectionRow}><Text style={styles.heading}>Desktop simulator connection</Text><Tag color={desktopStatus === 'connected' ? 'green' : 'amber'}>{desktopStatus === 'connected' ? 'CONNECTED' : desktopStatus === 'connecting' ? 'CONNECTING' : 'NOT CONNECTED'}</Tag></View>
+      <Text style={styles.body}>Enter the address and pairing code shown on the desktop IoT Simulator. Both devices need the same Wi‑Fi for simulated readings. Actual system push notifications also need internet and an installed APK.</Text>
+      <TextInput accessibilityLabel="Desktop simulator server address" autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="http://192.168.1.20:4174" value={serverAddress ?? desktopUrl} onChangeText={setServerAddress} style={styles.addressInput} />
+      <TextInput accessibilityLabel="Desktop simulator pairing code" keyboardType="number-pad" maxLength={6} placeholder="6-digit pairing code" value={code ?? pairingCode} onChangeText={setCode} style={styles.addressInput} />
+      <View style={styles.connectActions}>
+        <PrimaryButton title="Connect" onPress={() => {
+          const value = (serverAddress ?? desktopUrl).trim().replace(/\/+$/, '');
+          if (!/^http:\/\/(localhost|\d{1,3}(?:\.\d{1,3}){3})(:\d+)?$/i.test(value)) { setConnectionError('Enter the desktop LAN address, such as http://192.168.1.20:4174.'); return; }
+          const enteredCode = (code ?? pairingCode).trim();
+          if (!/^\d{6}$/.test(enteredCode)) { setConnectionError('Enter the six-digit pairing code shown on the desktop.'); return; }
+          setConnectionError('');
+          connectDesktop(value, enteredCode);
+        }} />
+        <PrimaryButton title="Disconnect" secondary onPress={() => { setConnectionError(''); disconnectDesktop(); }} />
+      </View>
+      {connectionError ? <Text style={styles.connectionError}>{connectionError}</Text> : null}
+      <Text style={styles.caption}>System push: {pushStatus}</Text>
+      {desktopStatus === 'connecting' ? <Text style={styles.caption}>Connecting or trying to reconnect. New desktop readings will appear when the server is reachable.</Text> : null}
+      {desktopStatus === 'connected' ? <Text style={styles.caption}>Connected. The app checks for new readings about once per second.</Text> : null}
     </Card>
     <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.backLink}><Text style={styles.backText}>‹  Home dashboard</Text></Pressable>
 
@@ -60,6 +85,7 @@ export default function SimulatorScreen() {
 
 const styles = StyleSheet.create({
   notice: { backgroundColor: '#FFF6E3', borderColor: '#E8D4A6' }, noticeText: { color: colors.amberInk, fontSize: 13, lineHeight: 20, fontWeight: '600' },
+  addressInput: { minHeight: 46, borderWidth: 1, borderColor: colors.line, borderRadius: 11, paddingHorizontal: 12, color: colors.ink, backgroundColor: '#FFFFFF' }, connectActions: { gap: 8 }, connectionError: { color: '#A23A2D', fontSize: 12, lineHeight: 18 },
   backLink: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 }, backText: { color: colors.darkGreen, fontWeight: '800', fontSize: 13 },
   currentCard: { backgroundColor: '#FCFDFC' }, sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }, heading: { color: colors.ink, fontSize: 16, fontWeight: '900' }, subheading: { color: colors.ink, fontSize: 13, fontWeight: '800' },
   metrics: { flexDirection: 'row', gap: 8 }, metric: { flex: 1, minHeight: 76, borderRadius: 13, padding: 10, justifyContent: 'center', gap: 6 }, metricLabel: { fontSize: 10, fontWeight: '900', letterSpacing: 0.4 }, metricValue: { color: colors.ink, fontSize: 16, fontWeight: '900' }, caption: { color: colors.muted, fontSize: 11, lineHeight: 16 },
