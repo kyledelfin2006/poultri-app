@@ -108,7 +108,7 @@ function commitReading(data: DemoData, houseId: string, reading: Signal): DemoDa
   let alerts = data.alerts;
   if (openAlert) {
     alerts = data.alerts.map((alert) => alert.id === openAlert.id
-      ? { ...alert, observed: observed.length ? observed.join(' while ') : alert.observed, temperature: reading.temperature, movement: reading.movement, referenceTemperature: house.reference.temperature, referenceMovement: house.reference.movement }
+      ? { ...alert, temperature: reading.temperature, movement: reading.movement, referenceTemperature: house.reference.temperature, referenceMovement: house.reference.movement }
       : alert);
   } else if (observed.length && !wasConditionActive) {
     alerts = [{ id: `alert-${houseId}-${Date.now()}`, houseId, status: 'New', observed: observed.join(' while '), temperature: reading.temperature, movement: reading.movement, referenceTemperature: house.reference.temperature, referenceMovement: house.reference.movement, note: '' }, ...data.alerts];

@@ -93,7 +93,7 @@ function commit(house, values) {
     if (alerts.length > 100) alerts.pop();
   } else if (alert) {
     Object.assign(alert, { temperature: house.temperature, movement: house.movement, active: result.active,
-      ...(result.active ? { observed: result.observed, suggestions: result.suggestions } : {}) });
+      ...(result.active ? { suggestions: result.suggestions } : {}) });
     if (!result.active) house.activeAlertId = null;
   }
   const event = { sequence: ++sequence, houseId: house.id, temperature: house.temperature, humidity: house.humidity,

@@ -16,44 +16,46 @@ This is the quickest way to try the app while developing. You need Node.js LTS o
 
    ```powershell
    cd mobile
-   npm install
-   npx expo start
+   npm.cmd install
+   npx.cmd expo start
    ```
 
 2. Connect the phone and computer to the same Wi-Fi network.
 3. Open Expo Go on the Android phone and scan the QR code shown in the terminal.
 
-Keep `npx expo start` running while using Expo Go. The phone must be able to reach the development server. Use the EAS APK and [Android push setup](desktop-simulator/README.md#one-time-android-push-setup) to demonstrate actual system notifications; Expo Go is not the push test build.
+Keep `npx.cmd expo start` running while using Expo Go. The phone must be able to reach the development server. Use an installed APK and [Android push setup](desktop-simulator/README.md#android-push-setup) to test system notifications; Expo Go is not the push test build.
 
 ### Build and install an Android APK
 
-An APK runs as a standalone app and is suitable for a mentor or business-partner demo. EAS Build creates it online, so you need internet access and an Expo account.
+An APK runs as a standalone app. This workspace has a locally built Android APK for ARM64 and x86_64 at `mobile/dist/poultri-demo.apk`. It is ignored by Git, so a fresh clone needs a new build. Copy it to an Android phone, open it in Files, and approve the install prompt. It embeds the app bundle, so Expo Go and Metro are not needed to run it. If an EAS-signed Poultri app is already installed, uninstall that copy before installing this locally signed APK; uninstalling clears its local demo data.
+
+For a new cloud build, EAS Build creates an APK online and needs internet access and an Expo account:
 
 1. Install Node.js LTS and create or sign in to an Expo account at [expo.dev](https://expo.dev/).
 2. Open PowerShell in the repository folder and run:
 
    ```powershell
    cd mobile
-   npm install
-   npx eas-cli@latest login
+   npm.cmd install
+   npx.cmd eas-cli@latest login
    ```
 
 3. If `mobile/app.json` does not already contain `extra.eas.projectId`, link the app once:
 
    ```powershell
-   npx eas-cli@latest init
+   npx.cmd eas-cli@latest init
    ```
 
    This creates or links the cloud project and writes its project ID into `mobile/app.json`. Skip this step if the project ID is already there.
 4. For the IoT Simulator's Android system notifications, use the [configured Firebase/FCM project](desktop-simulator/README.md#android-push-setup). Build the APK from `mobile/`:
 
    ```powershell
-   npm run build:apk
+   npm.cmd run build:apk
    ```
 
 5. When the cloud build finishes, open its build page. Under **Build artifact**, select **Install** to show the QR code. Scan it with the Android phone camera, open the link, then tap **Install** on the page to download the APK. Confirm Android's install prompt; Android may ask you to allow installs from that browser.
 
-The `build:apk` script runs the latest EAS CLI on demand, so no global install is needed. The `preview` profile in `mobile/eas.json` is configured to create an installable APK. No APK or signing credentials are checked into this repository.
+The `build:apk` script runs the latest EAS CLI on demand, so no global install is needed. The `preview` profile in `mobile/eas.json` creates an installable APK. The local APK is ignored by Git; no APK or signing credentials are checked into this repository.
 
 ## Demo walkthrough
 
@@ -68,7 +70,7 @@ The `build:apk` script runs the latest EAS CLI on demand, so no global install i
 
 ### Desktop IoT Simulator and Android notification demo
 
-Follow the [desktop startup and demo walkthrough](desktop-simulator/README.md#start-each-session). In brief: run `npm start` in `desktop-simulator/`, open `http://localhost:4174`, pair the phone from the mobile **Simulator** screen using the displayed network address and code, then change a house condition. Readings use local Wi-Fi. Real Android notifications require the newly built APK, notification permission, internet, and configured Expo/FCM credentials.
+Follow the [desktop startup and demo walkthrough](desktop-simulator/README.md#start-each-session). In brief: run `npm.cmd start` in `desktop-simulator/` from PowerShell, open `http://localhost:4174`, pair the phone from the mobile **Simulator** screen using the displayed network address and code, then change a house condition. Readings use local Wi-Fi. Real Android notifications require the APK, notification permission, internet, and configured Expo/FCM credentials.
 
 ## Demo limitations
 

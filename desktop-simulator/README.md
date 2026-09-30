@@ -13,7 +13,7 @@ This browser sandbox represents a **simulated** three-house farm. It uses the su
 
 Desktop-to-mobile readings work without Firebase. The Firebase project `poultri-demo-2026-0930` has Android app `com.poultri.mobile` registered and FCM v1 enabled. Its `google-services.json` is in `mobile/`, where `mobile/app.config.js` includes it in the Android build. The FCM v1 service-account key is assigned to the existing Poultri EAS project. The private key is not stored in this repository.
 
-From `mobile/`, run `npm install`, sign in with `npx eas-cli@latest login`, and run `npm run build:apk`. Install the new APK on a physical Android phone and allow Poultri notifications. Expo Go is useful for the local demo but is not the push test build.
+From `mobile/`, install the locally built `dist/poultri-demo.apk` in this workspace, or run `npm.cmd install`, sign in with `npx.cmd eas-cli@latest login`, and run `npm.cmd run build:apk` for an EAS build. The local APK is ignored by Git. Install the APK on a physical Android phone and allow Poultri notifications. Expo Go is useful for the local demo but is not the push test build.
 
 See [Expo's Android FCM setup](https://docs.expo.dev/push-notifications/fcm-credentials/) and [push setup](https://docs.expo.dev/push-notifications/push-notifications-setup/) for the current credential steps. Push needs internet on the computer and phone, even though readings use Wi-Fi locally. Expo/FCM acceptance is not proof that Android displayed the notification.
 
@@ -24,12 +24,12 @@ See [Expo's Android FCM setup](https://docs.expo.dev/push-notifications/fcm-cred
 
    ```powershell
    cd desktop-simulator
-   npm start
+   npm.cmd start
    ```
 
-   The desktop simulator has no packages to install; `npm start` runs Node directly. Node.js 22.13 or later is recommended.
+   The desktop simulator has no packages to install; `npm.cmd start` runs Node directly. Node.js 22.13 or later is recommended. The `.cmd` suffix avoids PowerShell's `npm.ps1` execution-policy error.
 3. Open `http://localhost:4174` on the computer. The page shows the local network address, a new pairing code, connection state, and push status. Keep the terminal open. If Windows Firewall prompts, permit Node on your **private** network.
-4. In the Poultri app, open **Simulator**. Enter the displayed desktop network address (for example `http://192.168.1.10:4174`) and pairing code, then tap **Connect**. Grant Android notification permission. Confirm the app says the desktop is connected and push is ready. If it says push unavailable, check the APK/FCM setup above.
+4. In the Poultri app, open **Simulator**. Enter the displayed desktop network address (for example `http://192.168.1.10:4174`) and pairing code, then tap **Connect**. Grant Android notification permission. Confirm the app says the desktop is connected and push is ready. If it says push unavailable, check the APK/FCM setup above. If the phone cannot reach the address, allow Node's inbound connection on this trusted Wi-Fi in Windows Firewall; a network marked **Public** may block it.
 5. Open **Home** or a house detail to see incoming simulated readings. Keep the app's local Simulator available for a disconnected walkthrough.
 
 ## Demo walkthrough

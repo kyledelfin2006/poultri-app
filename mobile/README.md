@@ -10,13 +10,17 @@ For the complete Expo Go setup, APK build steps, and demo walkthrough, see the r
 2. Open PowerShell in this folder and run:
 
    ```powershell
-   npm install
-   npx expo start
+   npm.cmd install
+   npx.cmd expo start
    ```
 
 3. Keep the phone and computer on the same Wi-Fi network. In Expo Go, scan the QR code shown in the terminal.
 
-Expo Go is convenient for development demonstrations. Actual Android system notifications from the desktop simulator require a new EAS APK; Firebase/FCM is [configured](../desktop-simulator/README.md#android-push-setup).
+Expo Go is convenient for development demonstrations. Android system notifications from the desktop simulator require an installed APK; Firebase/FCM is [configured](../desktop-simulator/README.md#android-push-setup).
+
+## Install the locally built Android APK
+
+This workspace has `dist/poultri-demo.apk`, built locally for ARM64 and x86_64 Android with the JavaScript bundle included. It is ignored by Git, so a fresh clone needs a new build. Copy it to an Android phone, open it in Files, and approve the install prompt. It runs without Expo Go or a Metro server. It is signed with a local debug key for sideloading, so uninstall any EAS-signed copy of `com.poultri.mobile` first; uninstalling clears local demo data. Android push delivery still needs a physical phone test.
 
 ## Build an Android APK
 
@@ -24,26 +28,26 @@ Expo Go is convenient for development demonstrations. Actual Android system noti
 2. In this folder, install the app packages and sign in to EAS:
 
    ```bash
-   npm install
-   npx eas-cli@latest login
+   npm.cmd install
+   npx.cmd eas-cli@latest login
    ```
 
 3. If `app.json` does not already contain `extra.eas.projectId`, link this app once:
 
    ```bash
-   npx eas-cli@latest init
+   npx.cmd eas-cli@latest init
    ```
 
    This creates or links the cloud project and writes its project ID into `app.json`. Skip this step if the project ID is already there.
 4. To receive Android system notifications, build an APK with the [Firebase/FCM configuration](../desktop-simulator/README.md#android-push-setup):
 
    ```bash
-   npm run build:apk
+   npm.cmd run build:apk
    ```
 
 5. When the cloud build completes, open its build page. Under **Build artifact**, select **Install** to show a QR code. Scan it with the Android phone camera, open the link, then tap **Install** on the page to download the APK. Confirm Android's install prompt; Android may ask you to allow installs from that browser.
 
-The `build:apk` script uses the `preview` profile, which is configured for an installable APK. EAS CLI runs on demand through `npx`; it is not an app dependency. An Expo account and network access are required for the hosted build. This repository does not contain a built APK or signing credentials.
+The `build:apk` script uses the `preview` profile, which is configured for an installable APK. EAS CLI runs on demand through `npx`; it is not an app dependency. An Expo account and network access are required for the hosted build. The locally built APK above is ignored by Git, and signing credentials are not stored in the repository.
 
 ## Walkthrough
 
