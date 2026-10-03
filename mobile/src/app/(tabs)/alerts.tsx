@@ -1,6 +1,6 @@
 import { Link } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
-import { Card, ComparisonBars, Page, Tag, colors } from '../../components';
+import { Card, Page, Tag, colors } from '../../components';
 import { isAlertConditionActive, useDemo } from '../../demo';
 
 export default function AlertsScreen() {
@@ -13,8 +13,6 @@ export default function AlertsScreen() {
         <View style={styles.row}><Tag color={alert.status === 'Resolved' ? 'green' : 'amber'}>{alert.status.toUpperCase()}</Tag>{alert.status !== 'Resolved' ? <Tag color={isAlertConditionActive(alert) ? 'amber' : 'green'}>{isAlertConditionActive(alert) ? 'ACTIVE CHANGE' : 'RECOVERED'}</Tag> : null}<Text style={styles.muted}>{house?.name}</Text></View>
         <Text style={styles.heading}>{alert.status === 'Resolved' ? 'Inspection record' : 'A change to inspect'}</Text>
         <Text style={styles.body}>{alert.observed}</Text>
-        <ComparisonBars label="Temperature" reference={alert.referenceTemperature} latest={alert.temperature} minimum={24} maximum={38} suffix="°C" precision={1} latestLabel={alert.status === 'Resolved' ? 'At resolve' : 'Latest'} color={colors.temperature} />
-        <ComparisonBars label="Movement" reference={alert.referenceMovement} latest={alert.movement} minimum={0} maximum={100} suffix="%" latestLabel={alert.status === 'Resolved' ? 'At resolve' : 'Latest'} color={colors.movement} />
         {alert.note ? <Text style={styles.notePreview}>Inspection note: {alert.note}</Text> : null}
         <Link href={{ pathname: '/alert/[id]', params: { id: alert.id } }} asChild><Pressable accessibilityRole="button" accessibilityLabel={`Review ${house?.name ?? 'poultry house'} alert`} style={styles.button}><Text style={styles.buttonText}>Review alert</Text></Pressable></Link>
       </Card>;

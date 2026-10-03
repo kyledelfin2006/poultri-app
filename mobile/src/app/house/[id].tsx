@@ -30,8 +30,6 @@ export default function HouseScreen() {
     </Card>
 
     <Card style={styles.trendCard}><View style={styles.row}><Text style={styles.heading}>Temperature over time</Text><View style={styles.legend}><View style={[styles.dot, { backgroundColor: colors.temperature }]} /><Text style={styles.legendText}>°C</Text></View></View><TrendChart values={readings.map((item) => item.temperature)} labels={labels} suffix="°" color={colors.temperature} /><Text style={styles.muted}>Each simulator step and signal edit adds a reading.</Text></Card>
-    <Card style={styles.trendCard}><View style={styles.row}><Text style={styles.heading}>Humidity over time</Text><View style={styles.legend}><View style={[styles.dot, { backgroundColor: colors.humidity }]} /><Text style={styles.legendText}>%</Text></View></View><TrendChart values={readings.map((item) => item.humidity)} labels={labels} suffix="%" color={colors.humidity} /></Card>
-    <Card style={styles.trendCard}><View style={styles.row}><Text style={styles.heading}>Movement over time</Text><View style={styles.legend}><View style={[styles.dot, { backgroundColor: colors.movement }]} /><Text style={styles.legendText}>%</Text></View></View><TrendChart values={readings.map((item) => item.movement)} labels={labels} suffix="%" color={colors.movement} /></Card>
     <Card style={styles.notice}><Text style={styles.noticeTitle}>What this means</Text><Text style={styles.noticeText}>A potential change is a prompt to inspect this area. Poultri does not diagnose or prescribe treatment.</Text></Card>
   </Page>;
 }

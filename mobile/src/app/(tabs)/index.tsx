@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Card, Page, PrimaryButton, SignalBar, Tag, TrendChart, colors } from '../../components';
+import { Card, Page, PrimaryButton, SignalBar, Tag, colors } from '../../components';
 import { getHouseStatus, isAlertConditionActive, useDemo } from '../../demo';
 
 export default function HomeScreen() {
@@ -17,9 +17,7 @@ export default function HomeScreen() {
     </Card>
 
     <View style={styles.metrics}>
-      <Card style={[styles.metric, styles.metricGreen]}><Text style={styles.metricLabel}>POULTRY HOUSES</Text><Text style={styles.metricValue}>{data.houses.length}</Text><Text style={styles.metricHint}>in this demo farm</Text></Card>
       <Card style={[styles.metric, housesNeedingAttention ? styles.metricAmber : styles.metricBlue]}><Text style={styles.metricLabel}>NEED INSPECTION</Text><Text style={styles.metricValue}>{housesNeedingAttention}</Text><Text style={styles.metricHint}>{housesNeedingAttention ? 'current house status' : 'all demo houses steady'}</Text></Card>
-      <Card style={[styles.metric, latestAlert ? styles.metricAmber : styles.metricTeal]}><Text style={styles.metricLabel}>OPEN ALERTS</Text><Text style={styles.metricValue}>{openAlerts.length}</Text><Text style={styles.metricHint}>{latestAlert ? 'inspection records' : 'none in this demo'}</Text></Card>
       <Card style={[styles.metric, styles.metricPurple]}><Text style={styles.metricLabel}>EGGS TODAY</Text><Text style={styles.metricValue}>{production.toLocaleString()}</Text><Text style={styles.metricHint}>illustrative total</Text></Card>
     </View>
 
@@ -44,17 +42,12 @@ export default function HomeScreen() {
       </Pressable>;
     })}
 
-    <Card>
-      <View style={styles.row}><Text style={styles.heading}>House 2 temperature trend</Text><Tag color="muted">LIVE DEMO</Tag></View>
-      <TrendChart values={scenarioHouse.readings.slice(-6).map((item) => item.temperature)} labels={scenarioHouse.readings.slice(-6).map((item) => `S${item.step}`)} suffix="°" color={colors.temperature} />
-      <Text style={styles.muted}>Updates with each simulator step or saved signal edit.</Text>
-    </Card>
   </Page>;
 }
 
 const styles = StyleSheet.create({
   simulatorCard: { backgroundColor: '#EDF6E8', borderColor: '#D4E7C9' }, simulatorIntro: { flexDirection: 'row', alignItems: 'center', gap: 12 }, simulatorIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.darkGreen }, playGlyph: { color: colors.white, fontSize: 15 }, simulatorCopy: { flex: 1, gap: 3 }, eyebrow: { color: colors.darkGreen, fontSize: 9, fontWeight: '900', letterSpacing: 1 }, simulatorTitle: { color: colors.ink, fontSize: 16, fontWeight: '900' },
-  metrics: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, metric: { width: '48%', flexGrow: 1, padding: 13, gap: 4, borderWidth: 0 }, metricGreen: { backgroundColor: '#EAF5E5' }, metricAmber: { backgroundColor: '#FFF2D9' }, metricBlue: { backgroundColor: '#EAF3FB' }, metricTeal: { backgroundColor: '#E7F5F1' }, metricPurple: { backgroundColor: '#F0ECF8' }, metricLabel: { color: colors.muted, fontSize: 10, fontWeight: '900', letterSpacing: 0.4 }, metricValue: { color: colors.ink, fontSize: 25, fontWeight: '900' }, metricHint: { color: colors.muted, fontSize: 10 },
+  metrics: { flexDirection: 'row', gap: 8 }, metric: { flex: 1, padding: 13, gap: 4, borderWidth: 0 }, metricAmber: { backgroundColor: '#FFF2D9' }, metricBlue: { backgroundColor: '#EAF3FB' }, metricPurple: { backgroundColor: '#F0ECF8' }, metricLabel: { color: colors.muted, fontSize: 10, fontWeight: '900', letterSpacing: 0.4 }, metricValue: { color: colors.ink, fontSize: 25, fontWeight: '900' }, metricHint: { color: colors.muted, fontSize: 10 },
   alertCard: { backgroundColor: '#FFF8E9', borderColor: '#EEDCA9' }, normalCard: { backgroundColor: '#EDF6E8' }, goodGlyph: { color: colors.darkGreen, fontSize: 20, fontWeight: '900' }, row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }, heading: { color: colors.ink, fontWeight: '800', fontSize: 15 }, body: { color: '#586355', fontSize: 13, lineHeight: 20 }, muted: { color: colors.muted, fontSize: 11, lineHeight: 16 },
   sectionHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }, sectionTitle: { fontSize: 17, fontWeight: '900', color: colors.ink }, houseCard: { paddingVertical: 14, gap: 12 }, houseName: { fontSize: 15, fontWeight: '800', color: colors.ink }, signalBars: { flexDirection: 'row', gap: 9 },
 });

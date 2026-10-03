@@ -44,17 +44,11 @@ function render() {
   $('#phone-status').textContent = current.paired ? 'PHONE PAIRED' : 'NO PHONE';
   $('#phone-status').classList.toggle('neutral', !current.paired);
   $('#push-status').textContent = `${current.pushStatus.state}: ${current.pushStatus.detail}`;
-  const overview = $('#house-overview'); overview.replaceChildren();
   for (const item of current.houses) {
     const button = $(`[data-house="${item.id}"]`);
     button.setAttribute('aria-pressed', String(item.id === selected));
     button.classList.toggle('warning', item.status !== 'Normal');
-    button.classList.toggle('low-movement', item.reference.movement - item.movement >= 20);
     button.querySelector('.house-condition').textContent = item.status === 'Normal' ? 'NORMAL' : 'INSPECT';
-    const summary = document.createElement('div'); summary.className = `overview-item ${item.status === 'Normal' ? '' : 'warning'}`;
-    const title = document.createElement('strong'); title.textContent = item.name;
-    const detail = document.createElement('span'); detail.textContent = `${item.temperature.toFixed(1)}°C · ${item.movement}% movement · ${item.status}`;
-    summary.append(title, detail); overview.append(summary);
   }
   $('#selected-heading').textContent = house.name;
   $('#selected-status').textContent = house.status === 'Normal' ? 'NORMAL' : 'INSPECT';

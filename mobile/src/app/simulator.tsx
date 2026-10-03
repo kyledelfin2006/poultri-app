@@ -1,8 +1,7 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Card, Page, PrimaryButton, SignalSlider, Tag, TrendChart, colors } from '../components';
-import { RULE_EXPLANATION, getHouseStatus, scenarios, useDemo } from '../demo';
+import { Card, Page, PrimaryButton, SignalSlider, Tag, colors } from '../components';
+import { RULE_EXPLANATION, scenarios, useDemo } from '../demo';
 
 const scenarioCopy = {
   Normal: 'Show steady readings near the demo reference.',
@@ -22,7 +21,7 @@ export default function SimulatorScreen() {
   return <Page title="Simulator" subtitle="Local demo input · not live data">
     <Card style={styles.notice}>
       <Tag color="amber">DEMO INPUT · SIMULATION ONLY</Tag>
-      <Text style={styles.noticeText}>These readings are entered locally for demonstration. A deployed Poultri system is intended to receive data from a Raspberry Pi and connected IoT devices. This prototype is not connected to that hardware.</Text>
+      <Text style={styles.noticeText}>These readings come from this app or the local desktop simulator. A deployed Poultri system is intended to receive data from a Raspberry Pi and connected IoT devices. This prototype is not connected to that hardware.</Text>
     </Card>
     <Card>
       <View style={styles.sectionRow}><Text style={styles.heading}>Desktop simulator connection</Text><Tag color={desktopStatus === 'connected' ? 'green' : 'amber'}>{desktopStatus === 'connected' ? 'CONNECTED' : desktopStatus === 'connecting' ? 'CONNECTING' : 'NOT CONNECTED'}</Tag></View>
@@ -45,20 +44,6 @@ export default function SimulatorScreen() {
       {desktopStatus === 'connecting' ? <Text style={styles.caption}>Connecting or trying to reconnect. New desktop readings will appear when the server is reachable.</Text> : null}
       {desktopStatus === 'connected' ? <Text style={styles.caption}>Connected. The app checks for new readings about once per second.</Text> : null}
     </Card>
-    <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.backLink}><Text style={styles.backText}>‹  Home dashboard</Text></Pressable>
-
-    <Card style={styles.currentCard}>
-      <View style={styles.sectionRow}><Text style={styles.heading}>{house.name} live demo state</Text><Tag color={getHouseStatus(house) === 'Normal' ? 'green' : 'amber'}>{getHouseStatus(house)}</Tag></View>
-      <View style={styles.metrics}>
-        <View style={[styles.metric, { backgroundColor: '#FFF2E7' }]}><Text style={[styles.metricLabel, { color: colors.temperature }]}>TEMP</Text><Text style={styles.metricValue}>{latest.temperature.toFixed(1)}°C</Text></View>
-        <View style={[styles.metric, { backgroundColor: '#EAF4FC' }]}><Text style={[styles.metricLabel, { color: colors.humidity }]}>HUMIDITY</Text><Text style={styles.metricValue}>{latest.humidity}%</Text></View>
-        <View style={[styles.metric, { backgroundColor: '#E9F6F3' }]}><Text style={[styles.metricLabel, { color: colors.movement }]}>MOVEMENT</Text><Text style={styles.metricValue}>{latest.movement}%</Text></View>
-      </View>
-      <View style={styles.sectionRow}><Text style={styles.subheading}>Reading trend</Text><Tag color="muted">STEP {data.scenarioStep}/3</Tag></View>
-      <TrendChart values={house.readings.slice(-6).map((item) => item.temperature)} labels={house.readings.slice(-6).map((item) => `S${item.step}`)} suffix="°" color={colors.temperature} />
-      <Text style={styles.caption}>House status and alerts respond to the latest reading.</Text>
-    </Card>
-
     <Card>
       <View style={styles.sectionRow}><Text style={styles.heading}>Choose a scenario</Text><Tag color="muted">{data.scenarioStep} OF 3 STEPS</Tag></View>
       <View style={styles.scenarios}>{scenarios.map((scenario) => <Pressable key={scenario} accessibilityRole="button" accessibilityState={{ selected: data.scenario === scenario }} onPress={() => selectScenario(scenario)} style={[styles.scenario, data.scenario === scenario && styles.scenarioSelected]}>
@@ -86,9 +71,7 @@ export default function SimulatorScreen() {
 const styles = StyleSheet.create({
   notice: { backgroundColor: '#FFF6E3', borderColor: '#E8D4A6' }, noticeText: { color: colors.amberInk, fontSize: 13, lineHeight: 20, fontWeight: '600' },
   addressInput: { minHeight: 46, borderWidth: 1, borderColor: colors.line, borderRadius: 11, paddingHorizontal: 12, color: colors.ink, backgroundColor: '#FFFFFF' }, connectActions: { gap: 8 }, connectionError: { color: '#A23A2D', fontSize: 12, lineHeight: 18 },
-  backLink: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 }, backText: { color: colors.darkGreen, fontWeight: '800', fontSize: 13 },
-  currentCard: { backgroundColor: '#FCFDFC' }, sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }, heading: { color: colors.ink, fontSize: 16, fontWeight: '900' }, subheading: { color: colors.ink, fontSize: 13, fontWeight: '800' },
-  metrics: { flexDirection: 'row', gap: 8 }, metric: { flex: 1, minHeight: 76, borderRadius: 13, padding: 10, justifyContent: 'center', gap: 6 }, metricLabel: { fontSize: 10, fontWeight: '900', letterSpacing: 0.4 }, metricValue: { color: colors.ink, fontSize: 16, fontWeight: '900' }, caption: { color: colors.muted, fontSize: 11, lineHeight: 16 },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }, heading: { color: colors.ink, fontSize: 16, fontWeight: '900' }, caption: { color: colors.muted, fontSize: 11, lineHeight: 16 },
   scenarios: { gap: 8 }, scenario: { minHeight: 68, borderRadius: 13, borderWidth: 1, borderColor: colors.line, padding: 12, backgroundColor: '#FAFBF9', justifyContent: 'center', gap: 4 }, scenarioSelected: { borderColor: colors.green, backgroundColor: colors.paleGreen }, scenarioTitle: { color: colors.ink, fontSize: 13, fontWeight: '800' }, scenarioTitleSelected: { color: colors.darkGreen }, scenarioDescription: { color: colors.muted, fontSize: 11, lineHeight: 16 }, selectedMark: { color: colors.darkGreen, fontWeight: '900' },
   body: { color: '#586355', fontSize: 13, lineHeight: 20 }, rule: { backgroundColor: '#F4F6F2', borderRadius: 11, padding: 12, gap: 4 }, ruleTitle: { color: colors.ink, fontSize: 12, fontWeight: '800' }, ruleText: { color: colors.muted, fontSize: 12, lineHeight: 18 },
 });

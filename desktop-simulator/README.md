@@ -5,7 +5,7 @@ This browser sandbox represents a **simulated** three-house farm. It uses the su
 ## What changed
 
 - The farm map has selectable houses, scenario presets, manual temperature/humidity/movement/egg controls, a clock, play/pause/step, and speed controls.
-- The small Node server owns desktop readings and alert events. A transition into an alert state creates one event and one push submission; ongoing abnormal readings do not repeatedly push. Recovery keeps the alert record available.
+- The small Node server owns desktop readings and alerts. The phone polls its current state over local Wi-Fi. A transition into an alert state creates one alert and one push submission; ongoing abnormal readings do not repeatedly push. Recovery keeps the alert record available.
 - The mobile app pairs with a temporary six-digit code, follows desktop readings, merges desktop alerts by ID, and opens a matching alert when a system notification is tapped. The on-phone Simulator still works independently.
 - Suggestions ask the user to verify readings and inspect the house. They are demo prompts, not diagnoses or treatment advice. SMS, sensors, cameras, and a Raspberry Pi are not included.
 
@@ -13,7 +13,7 @@ This browser sandbox represents a **simulated** three-house farm. It uses the su
 
 Desktop-to-mobile readings work without Firebase. The Firebase project `poultri-demo-2026-0930` has Android app `com.poultri.mobile` registered and FCM v1 enabled. Its `google-services.json` is in `mobile/`, where `mobile/app.config.js` includes it in the Android build. The FCM v1 service-account key is assigned to the existing Poultri EAS project. The private key is not stored in this repository.
 
-From `mobile/`, install the locally built `dist/poultri-demo.apk` in this workspace, or run `npm.cmd install`, sign in with `npx.cmd eas-cli@latest login`, and run `npm.cmd run build:apk` for an EAS build. The local APK is ignored by Git. Install the APK on a physical Android phone and allow Poultri notifications. Expo Go is useful for the local demo but is not the push test build.
+From `mobile/`, install a completed local APK in `dist/`, or run `npm.cmd install`, sign in with `npx.cmd eas-cli@latest login`, and run `npm.cmd run build:apk` for an EAS build. APKs target ARM64 phones and are ignored by Git. Install one on a physical ARM64 Android phone and allow Poultri notifications. Expo Go is useful for the local demo but is not the push test build.
 
 See [Expo's Android FCM setup](https://docs.expo.dev/push-notifications/fcm-credentials/) and [push setup](https://docs.expo.dev/push-notifications/push-notifications-setup/) for the current credential steps. Push needs internet on the computer and phone, even though readings use Wi-Fi locally. Expo/FCM acceptance is not proof that Android displayed the notification.
 
@@ -43,7 +43,7 @@ See [Expo's Android FCM setup](https://docs.expo.dev/push-notifications/fcm-cred
 
 ## Status and limits
 
-- The browser's push status distinguishes **Ready**, **Submitted**, **Provider accepted**, and **Failed**. These statuses cannot confirm display on the phone; verify the Android tray directly.
+- The browser's push status distinguishes **Ready**, **Submitted**, and **Failed**. Submitted means Expo accepted the request; verify delivery in the Android notification tray.
 - If permission is denied, no token is available for pairing; the mobile app explains the push issue. Local readings and the alert list can still work when connected.
 - The server stores the pairing code, phone push token, readings, and alerts only in memory. Restarting it resets its farm and pairing code. Use on a trusted private LAN; this is a demo server, not a production authentication system.
 - No physical IoT hardware, validated health rule, diagnosis, treatment advice, SMS, or offline push delivery is provided.

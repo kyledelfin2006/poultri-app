@@ -27,7 +27,7 @@ Keep `npx.cmd expo start` running while using Expo Go. The phone must be able to
 
 ### Build and install an Android APK
 
-An APK runs as a standalone app. This workspace has a locally built Android APK for ARM64 and x86_64 at `mobile/dist/poultri-demo.apk`. It is ignored by Git, so a fresh clone needs a new build. Copy it to an Android phone, open it in Files, and approve the install prompt. It embeds the app bundle, so Expo Go and Metro are not needed to run it. If an EAS-signed Poultri app is already installed, uninstall that copy before installing this locally signed APK; uninstalling clears its local demo data.
+An APK runs as a standalone app. The Android build targets ARM64 phones; x86_64 emulators need a separate build. Copy a completed APK to an ARM64 Android phone, open it in Files, and approve the install prompt. It embeds the app bundle, so Expo Go and Metro are not needed to run it. APKs in `mobile/dist/` are ignored by Git. If an EAS-signed Poultri app is already installed, uninstall that copy before installing a locally signed APK; uninstalling clears its local demo data.
 
 For a new cloud build, EAS Build creates an APK online and needs internet access and an Expo account:
 
@@ -71,6 +71,8 @@ The `build:apk` script runs the latest EAS CLI on demand, so no global install i
 ### Desktop IoT Simulator and Android notification demo
 
 Follow the [desktop startup and demo walkthrough](desktop-simulator/README.md#start-each-session). In brief: run `npm.cmd start` in `desktop-simulator/` from PowerShell, open `http://localhost:4174`, pair the phone from the mobile **Simulator** screen using the displayed network address and code, then change a house condition. Readings use local Wi-Fi. Real Android notifications require the APK, notification permission, internet, and configured Expo/FCM credentials.
+
+The desktop browser simulator runs on the computer at localhost. Only the Android APK is distributed; the browser simulator is not a hosted website. The [reduction plan](reduction-plan.md) records the source and APK size targets.
 
 ## Demo limitations
 

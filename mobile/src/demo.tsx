@@ -30,7 +30,7 @@ export type FarmAlert = {
   source?: 'desktop';
 };
 export type RemoteAlert = Omit<FarmAlert, 'note' | 'source'> & { suggestions: string[]; active: boolean };
-type RemoteReading = { houseId: string; temperature: number; humidity: number; movement: number; eggs: number; alert?: RemoteAlert | null };
+type RemoteReading = { id: string; temperature: number; humidity: number; movement: number; eggs: number };
 type DemoData = {
   farmName: string;
   ownerName: string;
@@ -134,6 +134,9 @@ function applyRemoteAlert(data: DemoData, alert: RemoteAlert): DemoData {
   const suggestions = Array.isArray(alert.suggestions) ? alert.suggestions.filter((item): item is string => typeof item === 'string') : [];
   const existing = data.alerts.find((item) => item.id === alert.id);
   if (existing?.status === 'Resolved') return data;
+  if (existing && existing.observed === alert.observed && existing.temperature === alert.temperature
+    && existing.movement === alert.movement && existing.referenceTemperature === alert.referenceTemperature
+    && existing.referenceMovement === alert.referenceMovement && JSON.stringify(existing.suggestions) === JSON.stringify(suggestions)) return data;
   const record: FarmAlert = { id: alert.id, houseId: alert.houseId, status: existing?.status ?? 'New', observed: alert.observed,
     temperature: alert.temperature, movement: alert.movement, referenceTemperature: alert.referenceTemperature,
     referenceMovement: alert.referenceMovement, note: existing?.note ?? '', suggestions, source: 'desktop' };
@@ -141,15 +144,15 @@ function applyRemoteAlert(data: DemoData, alert: RemoteAlert): DemoData {
 }
 
 function applyRemoteReading(data: DemoData, item: RemoteReading): DemoData {
-  const house = data.houses.find((entry) => entry.id === item.houseId);
+  const house = data.houses.find((entry) => entry.id === item.id);
   if (!house || ![item.temperature, item.humidity, item.movement, item.eggs].every(Number.isFinite)) return data;
   const latest = house.readings.at(-1)!;
   const changed = latest.temperature !== item.temperature || latest.humidity !== item.humidity || latest.movement !== item.movement;
+  if (!changed && house.eggs === item.eggs) return data;
   const nextHouse = { ...house,
     readings: changed ? [...house.readings.slice(-11), { step: latest.step + 1, temperature: item.temperature, humidity: item.humidity, movement: item.movement }] : house.readings,
     eggs: item.eggs, production: house.production.map((value, index) => index === 6 ? item.eggs : value) };
-  const next = { ...data, houses: data.houses.map((entry) => entry.id === item.houseId ? nextHouse : entry) };
-  return item.alert ? applyRemoteAlert(next, item.alert) : next;
+  return { ...data, houses: data.houses.map((entry) => entry.id === item.id ? nextHouse : entry) };
 }
 
 async function fetchJson(url: string, options?: RequestInit) {
@@ -172,30 +175,7 @@ async function getPushToken() {
   return (await Notifications.getExpoPushTokenAsync({ projectId })).data;
 }
 
-type DemoContextValue = {
-  data: DemoData;
-  ready: boolean;
-  openAlerts: FarmAlert[];
-  selectScenario: (scenario: Scenario) => void;
-  advanceScenario: () => void;
-  setSignal: (signal: Omit<Signal, 'step'>) => void;
-  desktopUrl: string;
-  pairingCode: string;
-  desktopStatus: 'disconnected' | 'connecting' | 'connected';
-  pushStatus: string;
-  connectDesktop: (url: string, code: string) => void;
-  disconnectDesktop: () => void;
-  applyPushAlert: (alert: RemoteAlert) => void;
-  setEggs: (houseId: string, eggs: number) => void;
-  updateFarm: (values: Partial<Pick<DemoData, 'farmName' | 'ownerName'>>) => void;
-  updateHouse: (houseId: string, values: Partial<Pick<House, 'name' | 'birds'>>) => void;
-  updateAlert: (id: string, values: Partial<Pick<FarmAlert, 'status' | 'note'>>) => void;
-  setOffline: (offline: boolean) => void;
-  reset: () => void;
-};
-const DemoContext = createContext<DemoContextValue | null>(null);
-
-export function DemoProvider({ children }: { children: ReactNode }) {
+function useDemoState() {
   const [data, setData] = useState(initialData);
   const [ready, setReady] = useState(false);
   const [desktopUrl, setDesktopUrl] = useState('');
@@ -223,28 +203,17 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!ready || !desktopUrl || data.offline) return;
     let active = true;
-    let cursor: number | null = null;
-    let runId = '';
     let timer: ReturnType<typeof setTimeout>;
     const poll = async () => {
       try {
-        if (cursor === null) {
-          const snapshot = await fetchJson(`${desktopUrl}/api/state`) as { runId: string; sequence: number; houses: RemoteReading[]; alerts: RemoteAlert[] };
-          if (!active) return;
-          runId = snapshot.runId;
-          cursor = snapshot.sequence;
-          setData((current) => {
-            let next = current;
-            for (const house of snapshot.houses) next = applyRemoteReading(next, house);
-            for (const alert of snapshot.alerts) next = applyRemoteAlert(next, alert);
-            return next;
-          });
-        } else {
-          const batch = await fetchJson(`${desktopUrl}/api/events?after=${cursor}`) as { runId: string; sequence: number; events: RemoteReading[] };
-          if (!active) return;
-          if (batch.runId !== runId || batch.sequence < cursor) cursor = null;
-          else { cursor = batch.sequence; for (const event of batch.events) setData((current) => applyRemoteReading(current, event)); }
-        }
+        const snapshot = await fetchJson(`${desktopUrl}/api/state`) as { houses: RemoteReading[]; alerts: RemoteAlert[] };
+        if (!active) return;
+        setData((current) => {
+          let next = current;
+          for (const house of snapshot.houses) next = applyRemoteReading(next, house);
+          for (const alert of snapshot.alerts) next = applyRemoteAlert(next, alert);
+          return next;
+        });
         setDesktopStatus('connected');
         timer = setTimeout(poll, 700);
       } catch {
@@ -274,11 +243,11 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     return () => { active = false; };
   }, [ready, desktopUrl, pairingCode, desktopStatus, pairRevision, data.offline]);
 
-  const value = useMemo<DemoContextValue>(() => ({
+  const value = useMemo(() => ({
     data,
     ready,
     openAlerts: data.alerts.filter((alert) => alert.status !== 'Resolved'),
-    selectScenario: (scenario) => setData((current) => {
+    selectScenario: (scenario: Scenario) => setData((current) => {
       const house = current.houses.find((item) => item.id === HOUSE_ID)!;
       const next = {
         ...current,
@@ -294,12 +263,12 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       if (!nextSignal) return current;
       return { ...addReading(current, nextSignal), scenarioStep: current.scenarioStep + 1 };
     }),
-    setSignal: (signal) => setData((current) => addReading(current, signal)),
+    setSignal: (signal: Omit<Signal, 'step'>) => setData((current) => addReading(current, signal)),
     desktopUrl,
     pairingCode,
     desktopStatus,
     pushStatus,
-    connectDesktop: (url, code) => {
+    connectDesktop: (url: string, code: string) => {
       const normalized = url.trim().replace(/\/+$/, '');
       setDesktopUrl(normalized);
       setPairingCode(code.trim());
@@ -319,20 +288,26 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       AsyncStorage.removeItem(DESKTOP_CODE_KEY).catch(() => {});
     },
     applyPushAlert,
-    setEggs: (houseId, eggs) => setData((current) => ({
+    setEggs: (houseId: string, eggs: number) => setData((current) => ({
       ...current,
       houses: current.houses.map((house) => house.id === houseId
         ? { ...house, eggs, production: house.production.map((value, index) => index === 6 ? eggs : value) }
         : house),
     })),
-    updateFarm: (values) => setData((current) => ({ ...current, ...values })),
-    updateHouse: (houseId, values) => setData((current) => ({ ...current, houses: current.houses.map((house) => house.id === houseId ? { ...house, ...values } : house) })),
-    updateAlert: (id, values) => setData((current) => ({ ...current, alerts: current.alerts.map((alert) => alert.id === id ? { ...alert, ...values } : alert) })),
-    setOffline: (offline) => { setData((current) => ({ ...current, offline })); if (offline) setDesktopStatus('disconnected'); else if (desktopUrl) setDesktopStatus('connecting'); },
+    updateFarm: (values: Partial<Pick<DemoData, 'farmName' | 'ownerName'>>) => setData((current) => ({ ...current, ...values })),
+    updateHouse: (houseId: string, values: Partial<Pick<House, 'name' | 'birds'>>) => setData((current) => ({ ...current, houses: current.houses.map((house) => house.id === houseId ? { ...house, ...values } : house) })),
+    updateAlert: (id: string, values: Partial<Pick<FarmAlert, 'status' | 'note'>>) => setData((current) => ({ ...current, alerts: current.alerts.map((alert) => alert.id === id ? { ...alert, ...values } : alert) })),
+    setOffline: (offline: boolean) => { setData((current) => ({ ...current, offline })); if (offline) setDesktopStatus('disconnected'); else if (desktopUrl) setDesktopStatus('connecting'); },
     reset: () => setData(initialData()),
   }), [data, desktopStatus, desktopUrl, pairingCode, pushStatus, ready, applyPushAlert]);
 
-  return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
+  return value;
+}
+
+const DemoContext = createContext<ReturnType<typeof useDemoState> | null>(null);
+
+export function DemoProvider({ children }: { children: ReactNode }) {
+  return <DemoContext.Provider value={useDemoState()}>{children}</DemoContext.Provider>;
 }
 
 export function useDemo() {

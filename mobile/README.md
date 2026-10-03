@@ -20,7 +20,7 @@ Expo Go is convenient for development demonstrations. Android system notificatio
 
 ## Install the locally built Android APK
 
-This workspace has `dist/poultri-demo.apk`, built locally for ARM64 and x86_64 Android with the JavaScript bundle included. It is ignored by Git, so a fresh clone needs a new build. Copy it to an Android phone, open it in Files, and approve the install prompt. It runs without Expo Go or a Metro server. It is signed with a local debug key for sideloading, so uninstall any EAS-signed copy of `com.poultri.mobile` first; uninstalling clears local demo data. Android push delivery still needs a physical phone test.
+The build configuration targets ARM64 Android phones. APK files in `dist/` are ignored by Git, so a fresh clone needs a new build. Copy a completed APK to a compatible phone, open it in Files, and approve the install prompt. It runs without Expo Go or a Metro server. A locally built APK uses a debug signing key for sideloading, so uninstall any EAS-signed copy of `com.poultri.mobile` first; uninstalling clears local demo data. Android push delivery still needs a physical phone test.
 
 ## Build an Android APK
 
@@ -47,7 +47,9 @@ This workspace has `dist/poultri-demo.apk`, built locally for ARM64 and x86_64 A
 
 5. When the cloud build completes, open its build page. Under **Build artifact**, select **Install** to show a QR code. Scan it with the Android phone camera, open the link, then tap **Install** on the page to download the APK. Confirm Android's install prompt; Android may ask you to allow installs from that browser.
 
-The `build:apk` script uses the `preview` profile, which is configured for an installable APK. EAS CLI runs on demand through `npx`; it is not an app dependency. An Expo account and network access are required for the hosted build. The locally built APK above is ignored by Git, and signing credentials are not stored in the repository.
+The `build:apk` script uses the `preview` profile, which is configured for an installable APK. EAS CLI runs on demand through `npx`; it is not an app dependency. An Expo account and network access are required for the hosted build. Local APKs are ignored by Git, and signing credentials are not stored in the repository.
+
+`expo-build-properties` limits native libraries to ARM64 and permits the local HTTP connection to the desktop simulator. The web simulator itself runs on localhost and is not deployed.
 
 ## Walkthrough
 
@@ -61,4 +63,4 @@ The `build:apk` script uses the `preview` profile, which is configured for an in
 - Records are filterable by house and show illustrative seven-day production charts. Edit today's demo egg count in Simulator.
 - Profile edits the farm, owner, house names and bird counts, and can reset demo data.
 
-All data is labeled as demo data. The warning and suggested checks are for inspection and are not a diagnosis or treatment. The mobile app also keeps its local scenario controls when the desktop server is disconnected. A push needs internet and Expo/FCM; the desktop only reports submission/provider status, not confirmed phone display.
+All data is labeled as demo data. The warning and suggested checks are for inspection and are not a diagnosis or treatment. The mobile app also keeps its local scenario controls when the desktop server is disconnected. A push needs internet and Expo/FCM; the desktop reports submission status, not confirmed phone display.

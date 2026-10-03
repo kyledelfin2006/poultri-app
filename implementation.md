@@ -4,6 +4,8 @@
 
 This brief describes the original local-only mobile demo. The later, user-approved [desktop IoT Simulator](desktop-simulator/README.md) adds a separate browser farm sandbox, a trusted-LAN reading connection, and Android system push notifications. Firebase/FCM is configured; a new APK and physical phone test are still required to verify delivery. The original references below to excluding servers and notifications describe the earlier scope, not the current extension. All readings and alerts remain simulated and the rule remains illustrative and unvalidated.
 
+The [MVP reduction plan](reduction-plan.md) keeps the desktop simulator on localhost and configures the downloadable APK for ARM64 Android phones. The local browser simulator is not a hosted website.
+
 ## Objective
 
 Maintain a polished Expo / React Native demonstrator for Poultri. Mentors and business partners should be able to explore the main product idea using Expo Go or an installable Android APK, with no account, backend, camera, or farm hardware.

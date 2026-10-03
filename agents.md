@@ -4,7 +4,7 @@
 
 The repository includes an Expo / React Native TypeScript mobile demonstrator in `mobile/`, on the `main` branch. It is intended for Expo Go demos and an installable Android APK built with EAS. The official icon and wordmark are now used from the supplied `assets/` files.
 
-The current mobile code passes Expo lint and TypeScript checks. An Android JavaScript export with `--no-bytecode` passes; this verifies the bundle, not a native APK. The desktop browser sandbox and Node server live in `desktop-simulator/`. Firebase project `poultri-demo-2026-0930` has the Android app registered, `mobile/google-services.json` is included in the Expo config, and EAS has the FCM v1 service-account key assigned. Actual Android notification delivery still requires a new APK installed on a physical phone and a device check.
+The mobile code uses an ARM64-only APK build configuration; lint and TypeScript checks pass. A fresh native APK size and physical Android push delivery still need verification. The desktop browser sandbox and Node server live in `desktop-simulator/` and run locally. Firebase project `poultri-demo-2026-0930` has the Android app registered, `mobile/google-services.json` is included in the Expo config, and EAS has the FCM v1 service-account key assigned.
 
 ## Concept MVP assessment
 
@@ -20,7 +20,7 @@ The current mobile code passes Expo lint and TypeScript checks. An Android JavaS
 | On-site processing | Explained on Profile screen as an intended capability | Not implemented; there is no edge device or processing pipeline |
 | Proposed ₱40,000 package and separate subscription | Clearly labeled proposed pricing | Presentation only; no sales or billing flow |
 | Reliability, accuracy, and field validation | Targets are identified as targets | Not performed; no validated claims are made |
-| Farm profile and demo edits | Welcome screen, editable farm/owner/house details, and Simulator egg-production input | Local presentation-only profile; no real login or user accounts |
+| Farm profile and demo edits | Static welcome screen, editable farm/owner/house details in Profile, and Simulator egg-production input | Local presentation-only profile; no real login or user accounts |
 | Inspection notes | Alert can save a note locally | Demonstrated locally; not shared with workers |
 | Scenario walkthrough | On-phone presets and sliders plus a separate branded, three-house browser IoT Simulator with LAN pairing, playback, controls, and alert events | Deterministic simulation; Raspberry Pi and physical IoT input are not connected; rule is explicitly labeled unvalidated |
 
