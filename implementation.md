@@ -1,72 +1,17 @@
-# Poultri mobile prototype implementation brief
+# Poultri mobile starter brief
 
-## Later desktop simulator extension
+## Current baseline
 
-This brief describes the original local-only mobile demo. The later, user-approved [desktop IoT Simulator](desktop-simulator/README.md) adds a separate browser farm sandbox, a trusted-LAN reading connection, and Android system push notifications. Firebase/FCM is configured; a new APK and physical phone test are still required to verify delivery. The original references below to excluding servers and notifications describe the earlier scope, not the current extension. All readings and alerts remain simulated and the rule remains illustrative and unvalidated.
+The repository contains a branded Expo / React Native TypeScript app in `mobile/`. The single initial route displays the supplied Poultri logo and wordmark with a placeholder note. The project retains Expo Router, Expo Go support, and its EAS Android APK profile.
 
-The [MVP reduction plan](reduction-plan.md) keeps the desktop simulator on localhost and configures the downloadable APK for ARM64 Android phones. The local browser simulator is not a hosted website.
+## Current limits
 
-## Objective
+This is a starter template, not a farm-monitoring product. It contains no seeded farm data, alerts, simulator, desktop server, Firebase configuration, push notifications, or Wokwi integration. Do not describe it as connected to sensors or hardware.
 
-Maintain a polished Expo / React Native demonstrator for Poultri. Mentors and business partners should be able to explore the main product idea using Expo Go or an installable Android APK, with no account, backend, camera, or farm hardware.
+## Follow-up work
 
-This app is a local simulation. Keep that clear anywhere a reading, alert, or record could look real. Poultri surfaces changes for inspection; it does not diagnose or prescribe treatment.
+Wait for the user's Wokwi instructions before choosing an integration flow, device model, protocol, data shape, or UI. Keep the template minimal until that scope is provided.
 
-## Product guardrails
+## Development
 
-- Treat concept-note accuracy, response-time, offline-duration, and field-trial numbers as targets to validate, never as achieved results.
-- Describe the ₱40,000 installation package and separate subscription as proposed pricing.
-- Keep cameras, sensors, edge processing, cloud sync, accounts, payments, and farm trials out until evidence or infrastructure exists. The approved desktop demo adds push notifications for simulated alerts.
-- Keep the local demo useful without implying that a hardware monitoring MVP exists.
-
-## Demonstration MVP
-
-The existing mobile app in `mobile/` is the scope to maintain:
-
-- Branded static welcome screen with one clear demo entry action; it is not real authentication.
-- Color-coded Home dashboard with three example houses, current readings, production totals, house status, open alerts, and a prominent Simulator entry.
-- House details with simulated temperature, humidity, movement, activity, and production context.
-- Dedicated Simulator page with a demo/hardware notice, four local scenarios (Normal, Temperature rising, Movement dropping, and Recovery), step controls, charts, and custom inputs.
-- Editable House 2 temperature, humidity, movement, and egg-production controls on Simulator. Signal changes use the same illustrative, unvalidated rule as house status and update relevant app views through shared state.
-- Color-coded alert list and detail with reference/latest comparisons, active or recovered condition, acknowledgement, resolution, and a saved inspection note.
-- Read-only Records view for selecting a house and viewing seven illustrative days of production. Today's egg total is edited on Simulator.
-- Profile for local farm, owner, house, and bird-count edits; offline demonstration toggle; data reset; proposal and validation context.
-- Local persistence on the device. The on-phone demo remains usable without a network service; desktop readings require the local simulator server.
-
-Do not add product features speculatively. Prefer a direct screen or native control to a new abstraction or dependency. Retain a library only when it provides an active user-facing capability that Expo / React Native does not already provide.
-
-## UI and UX requirements
-
-- Use the supplied official Poultri logo and wordmark as provided. Do not redraw or recolor the artwork.
-- Use white surfaces, readable dark text, and Spring Boot green (`#6DB33F`) as the primary accent. Use distinct, labeled chart colors for temperature, humidity, movement, and production. Amber and green status states must also have text labels.
-- Make Home an at-a-glance dashboard; put simulation controls on a dedicated route opened by one obvious Home action. Keep the main tabs labeled Home, Alerts, Records, Profile.
-- Keep interactive controls at least 44 dp high where practical. Give buttons, scenario choices, house cards, and selectors accessible roles, labels, and selected states.
-- Use readable supporting text (normally 12 sp or larger), meaningful spacing, safe areas, and layouts that fit narrow Android screens.
-- Show slider values as they move and commit a reading when the presenter releases the control.
-- Prefer labeled metric cards, comparison bars, and trend charts over long explanations when a visual conveys the data faster. Include numeric values, units, and text equivalents for every visual.
-- Put a high-contrast notice at the top of Simulator explaining that inputs are local demo data and a deployed system is intended to receive readings from a Raspberry Pi and connected IoT devices; state that hardware is not connected to this prototype.
-- Make selected states and system feedback clear. Avoid color as the only status cue and avoid tiny chart labels.
-- Mark simulated values and example records in context. Keep the alert explanation factual: state the observed change and its demo reference, then invite inspection.
-- Keep the welcome page intentionally static. Do not add password fields, account setup, or a second path that bypasses the main demo action.
-
-## Data and alert behavior
-
-- Use a small local model for farm details, houses, readings, seven production values, alerts, and scenario progress.
-- Keep scenario data deterministic, bounded, and plausible for a presentation. Scenario steps should show normal behavior, a change, an alert, and recovery across the available presets.
-- Use `DemoProvider` as the single source of truth. Sensor edits update Home, house details, and alert condition; egg-production edits update Home totals and Records. Do not add parallel copies of demo state.
-- On recovery, update the live condition and latest-reading comparison while preserving unresolved alerts and their inspection notes.
-- Use one shared set of example-rule thresholds for both generated alert text and house status. Explain the rule and label it as unvalidated.
-- Preserve acknowledgement, resolution, notes, profile edits, readings, and records across relaunches. Reset restores a clean walkthrough.
-- Do not use health diagnoses, treatment advice, or universal safe/danger thresholds.
-
-## Run and delivery
-
-- Use the existing Expo Router / TypeScript app structure. Keep the approved local simulator server separate in `desktop-simulator/`; avoid dependencies for one-off UI details.
-- For Expo Go: from `mobile/`, run `npm install` and `npx expo start`; scan the QR code on the same network.
-- For an installable APK: use the EAS `preview` profile in `mobile/eas.json`, which must produce an APK rather than an app bundle. State clearly if no hosted APK build has been produced.
-- Follow the root `README.md` for Expo Go setup, APK build steps, and the presenter walkthrough; use `mobile/README.md` for app-specific details.
-- Before completion, follow `mobile/AGENTS.md` for Expo lint and TypeScript checks. Never describe those checks as an APK build.
-
-## Out of scope
-
-Live cameras or computer vision; physical sensor connections; calibrated poultry-health rules; cloud accounts and synchronization; billing; deployment; validated impact claims; and field trials. Android push for simulated desktop alerts is an approved demonstration feature.
+From `mobile/`, use `npm install` and `npx expo start` for Expo Go. The `preview` EAS profile builds an installable Android APK. See `mobile/README.md` for commands and checks.

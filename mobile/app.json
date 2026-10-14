@@ -8,13 +8,7 @@
     "icon": "./assets/poultri-logo.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSLocalNetworkUsageDescription": "Connect to the Poultri desktop farm simulator on your local Wi-Fi network.",
-        "NSAppTransportSecurity": {
-          "NSAllowsLocalNetworking": true
-        }
-      }
+      "supportsTablet": true
     },
     "android": {
       "package": "com.poultri.mobile",
@@ -24,11 +18,7 @@
       },
       "predictiveBackGestureEnabled": false
     },
-    "plugins": [
-      "expo-router",
-      ["expo-notifications", { "icon": "./assets/android-icon-monochrome.png", "color": "#155B36" }],
-      ["expo-build-properties", { "android": { "buildArchs": ["arm64-v8a"], "usesCleartextTraffic": true } }]
-    ],
+    "plugins": ["expo-router"],
     "extra": {
       "router": {},
       "eas": {

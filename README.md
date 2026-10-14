@@ -1,85 +1,33 @@
-# Poultri
+# Poultri mobile template
 
-Poultri is a proposed low-cost early-warning monitoring system for layer farms. This repository contains an Expo / React Native mobile demonstrator in [`mobile/`](mobile/).
+Poultri is a small Expo / React Native TypeScript starter that preserves the official Poultri branding. It currently opens to a placeholder screen. Farm monitoring, demo data, desktop tools, and Wokwi integration are not included.
 
-The prototype uses local simulated readings and production records. It does not diagnose, connect to real cameras or sensors, or implement on-site processing.
+## Run with Expo Go
 
-The [desktop browser IoT Simulator](desktop-simulator/README.md) provides a playable three-house farm sandbox. It sends simulated readings to the app over a trusted local Wi-Fi network. Firebase/FCM is configured for Android pushes; install a new APK to test notifications on a phone. This remains demo data, not connected IoT hardware.
+Install Node.js LTS and Expo Go, then run these commands from `mobile/`:
 
-## Run the demo
+```powershell
+npm.cmd install
+npx.cmd expo start
+```
 
-### Expo Go
+Scan the terminal QR code with Expo Go.
 
-This is the quickest way to try the app while developing. You need Node.js LTS on your computer and Expo Go on an Android phone.
+## Build an Android APK
 
-1. Open PowerShell in the repository folder and run:
+The existing EAS `preview` profile builds an installable APK. From `mobile/`, sign in to EAS and run:
 
-   ```powershell
-   cd mobile
-   npm.cmd install
-   npx.cmd expo start
-   ```
+```powershell
+npx.cmd eas-cli@latest login
+npm.cmd run build:apk
+```
 
-2. Connect the phone and computer to the same Wi-Fi network.
-3. Open Expo Go on the Android phone and scan the QR code shown in the terminal.
+The build is hosted by EAS and requires an Expo account and internet access.
 
-Keep `npx.cmd expo start` running while using Expo Go. The phone must be able to reach the development server. Use an installed APK and [Android push setup](desktop-simulator/README.md#android-push-setup) to test system notifications; Expo Go is not the push test build.
+## Project files
 
-### Build and install an Android APK
-
-An APK runs as a standalone app. The Android build targets ARM64 phones; x86_64 emulators need a separate build. Copy a completed APK to an ARM64 Android phone, open it in Files, and approve the install prompt. It embeds the app bundle, so Expo Go and Metro are not needed to run it. APKs in `mobile/dist/` are ignored by Git. If an EAS-signed Poultri app is already installed, uninstall that copy before installing a locally signed APK; uninstalling clears its local demo data.
-
-For a new cloud build, EAS Build creates an APK online and needs internet access and an Expo account:
-
-1. Install Node.js LTS and create or sign in to an Expo account at [expo.dev](https://expo.dev/).
-2. Open PowerShell in the repository folder and run:
-
-   ```powershell
-   cd mobile
-   npm.cmd install
-   npx.cmd eas-cli@latest login
-   ```
-
-3. If `mobile/app.json` does not already contain `extra.eas.projectId`, link the app once:
-
-   ```powershell
-   npx.cmd eas-cli@latest init
-   ```
-
-   This creates or links the cloud project and writes its project ID into `mobile/app.json`. Skip this step if the project ID is already there.
-4. For the IoT Simulator's Android system notifications, use the [configured Firebase/FCM project](desktop-simulator/README.md#android-push-setup). Build the APK from `mobile/`:
-
-   ```powershell
-   npm.cmd run build:apk
-   ```
-
-5. When the cloud build finishes, open its build page. Under **Build artifact**, select **Install** to show the QR code. Scan it with the Android phone camera, open the link, then tap **Install** on the page to download the APK. Confirm Android's install prompt; Android may ask you to allow installs from that browser.
-
-The `build:apk` script runs the latest EAS CLI on demand, so no global install is needed. The `preview` profile in `mobile/eas.json` creates an installable APK. The local APK is ignored by Git; no APK or signing credentials are checked into this repository.
-
-## Demo walkthrough
-
-1. Continue from the branded welcome screen into the demo farm.
-2. On **Home**, open **Simulator**. The page begins with a notice that readings are local demo inputs and that Raspberry Pi/IoT ingestion is intended for a deployed system, but is not connected in this prototype.
-3. Select **Temperature rising** or **Movement dropping**, then advance the scenario step by step. Watch the Simulator, Home, house detail, and alert visuals respond to the same shared readings.
-4. Open the alert, acknowledge it, and save an inspection note. Return to Simulator, choose **Recovery**, and advance the steps. Confirm that readings recover while the alert and note remain available, then resolve the record from Alerts.
-5. Use the Simulator sliders to create a custom temperature, humidity, movement, or egg-production example. Values preview while dragging and update the relevant dashboards when released.
-6. Open **Records** and switch houses to view the seven-day illustrative production charts. The egg total edited in Simulator appears there.
-7. Open **Profile** to edit the farm, owner, and house details; reset the data to restart the walkthrough.
-8. Toggle **Simulate offline** to show that the local demo screens remain available.
-
-### Desktop IoT Simulator and Android notification demo
-
-Follow the [desktop startup and demo walkthrough](desktop-simulator/README.md#start-each-session). In brief: run `npm.cmd start` in `desktop-simulator/` from PowerShell, open `http://localhost:4174`, pair the phone from the mobile **Simulator** screen using the displayed network address and code, then change a house condition. Readings use local Wi-Fi. Real Android notifications require the APK, notification permission, internet, and configured Expo/FCM credentials.
-
-The desktop browser simulator runs on the computer at localhost. Only the Android APK is distributed; the browser simulator is not a hosted website. The [reduction plan](reduction-plan.md) records the source and APK size targets.
-
-## Demo limitations
-
-The app uses simulated readings and production records. It does not connect to cameras or sensors and does not implement on-site processing. The offline control is a demonstration setting; it does not prove the concept note's seven-day offline validation target. All alerts are inspection prompts, not diagnoses. Push delivery depends on Expo/FCM and internet; a submitted push is not confirmation that the phone displayed it.
-
-## More information
-
-- [Mobile app details](mobile/README.md)
+- [Mobile setup](mobile/README.md)
 - [Implementation brief](implementation.md)
-- [MVP implementation assessment and agent guidance](agents.md)
+- [Agent guidance](agents.md)
+
+Wokwi support will be scoped after the follow-up instructions are provided.
