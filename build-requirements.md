@@ -18,7 +18,7 @@ flowchart LR
 - **Mobile:** one Expo Router screen. It polls the bridge, displays current temperature/humidity, and shows one local prompt.
 - **Network paths:** Wokwi firmware calls `http://host.wokwi.internal:4174`; the phone calls `http://<laptop-LAN-IPv4>:4174`.
 
-The Wokwi VS Code private gateway is required for the simulator to reach the laptop. Wokwi's current networking guide says private-gateway access is for paying users; confirm your Wokwi plan/license before depending on this path. The public gateway cannot reach the laptop's local network. Wokwi for VS Code includes a local gateway, and the VS Code extension is a commercial product after its free trial. [Wokwi Wi-Fi and gateway guide](https://docs.wokwi.com/guides/esp32-wifi), [Wokwi VS Code project configuration](https://docs.wokwi.com/vscode/project-config).
+The Wokwi Private Gateway is required for the simulator to reach the laptop. Wokwi's current networking guide says private-gateway access is for paying users; confirm your Wokwi plan/license before depending on this path. The public gateway cannot reach the laptop's local network. Wokwi for VS Code includes a bundled gateway, but its local endpoint must be available at `ws://localhost:9011`. In the current verification run, the simulator itself started and printed DHT22 readings, but reported that this endpoint was unavailable, so no readings reached the bridge. [Wokwi Wi-Fi and gateway guide](https://docs.wokwi.com/guides/esp32-wifi), [Wokwi VS Code project configuration](https://docs.wokwi.com/vscode/project-config).
 
 ## Prerequisites
 
@@ -73,7 +73,7 @@ Pop-Location
 
 If PlatformIO IDE is providing the CLI on `PATH`, `cd .\wokwi; pio run` is equivalent. The first build downloads the ESP32 platform, compiler, Arduino framework, and DHT library; an internet connection is needed for that initial build. A successful build creates `.pio/build/esp32dev/firmware.bin` and `firmware.elf` for Wokwi.
 
-The following sections document the checked-in project files for reference. No file copying is needed.
+Open the repository in VS Code. If the extension does not find the nested project automatically, use Command Palette → **Wokwi: Select Config File** and select `wokwi/wokwi.toml`; Wokwi requires selecting a config when it is below the workspace root. Then run Command Palette → **Wokwi: Start Simulator**. The following sections document the checked-in project files for reference. No file copying is needed.
 
 ### `wokwi/platformio.ini`
 
@@ -206,7 +206,7 @@ void loop() {
 }
 ```
 
-After building, run the simulator from VS Code Command Palette → **Wokwi: Start Simulator**. Use the DHT22 controls to change temperature and humidity and confirm the serial values follow the controls. The firmware reads every two seconds because that matches the DHT22 sampling interval. It continues printing readings if Wi-Fi or the bridge is unavailable.
+After building, run the simulator from VS Code Command Palette → **Wokwi: Start Simulator**. Use the DHT22 controls to change temperature and humidity and confirm the serial values follow the controls. The firmware reads every two seconds because that matches the DHT22 sampling interval. It continues printing readings if Wi-Fi or the bridge is unavailable. For a mobile alert, establish an app baseline first (the diagram defaults to 24°C), then raise temperature to at least 25.5°C. The app polls once per second and should show the illustrative prompt after the next fresh reading.
 
 To rebuild from the repository root:
 
@@ -216,6 +216,8 @@ Push-Location .\wokwi
 & $pio run
 Pop-Location
 ```
+
+If VS Code is already providing `pio` on `PATH`, use `pio run` instead. When Wokwi reports that `ws://localhost:9011` is unavailable, the simulator can still demonstrate the DHT22 locally, but the bridge and mobile app will receive no new samples until the Private Gateway is active.
 
 ## Stage 2: run the local Node bridge
 
@@ -723,11 +725,13 @@ npm.cmd start
 
 ```powershell
 # Terminal 2
-cd .\wokwi
-pio run
+$pio = Join-Path $env:USERPROFILE '.platformio\penv\Scripts\platformio.exe'
+Push-Location .\wokwi
+& $pio run
+Pop-Location
 ```
 
-Start the Wokwi simulator in VS Code after the build. The `[net] gateway` setting above points it to Wokwi for VS Code's local gateway at `ws://localhost:9011`; confirm the gateway reports a connected client. Click the DHT22, change the temperature and humidity, and confirm the serial values follow the sliders. The Wokwi firmware should log successful HTTP POST status codes.
+Start the Wokwi simulator in VS Code after the build. If the repository root is open and Wokwi does not find the nested project, use Command Palette → **Wokwi: Select Config File** and choose `wokwi/wokwi.toml`. The `[net] gateway` setting above points to `ws://localhost:9011`; confirm the Private Gateway is active. Click the DHT22, change the temperature and humidity, and confirm the serial values follow the controls. The Wokwi firmware should log successful HTTP POST status codes. If the simulator reports that the gateway is unavailable, Wokwi can run the sensor simulation by itself, but the mobile app will not receive readings until the Private Gateway is active.
 
 ```powershell
 # Terminal 3
@@ -736,7 +740,7 @@ npm.cmd install
 npx.cmd expo start
 ```
 
-Scan the QR code with Expo Go for UI iteration. Enter the laptop's Wi-Fi IPv4 bridge URL in the app and tap **Connect**. For acceptance on Android, create a fresh preview APK after changing `app.json`:
+Scan the QR code with Expo Go for UI iteration. Enter the laptop's Wi-Fi IPv4 bridge URL in the app and tap **Connect**. For a complete alert demo, leave the DHT22 at 24°C until the app connects and takes its baseline; then raise the simulated temperature to at least 25.5°C. For acceptance on Android, create a fresh preview APK after changing `app.json`:
 
 ```powershell
 npx.cmd eas-cli@latest build --platform android --profile preview
