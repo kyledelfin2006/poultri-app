@@ -23,9 +23,10 @@ The Wokwi VS Code private gateway is required for the simulator to reach the lap
 ## Prerequisites
 
 1. Windows, VS Code, Git, Node.js LTS, and npm.
-2. VS Code extensions: **PlatformIO IDE** and **Wokwi for VS Code**. Sign in/activate Wokwi as prompted.
-3. A Wokwi for VS Code license that can use the private gateway. The guide below configures its local gateway at `ws://localhost:9011`.
-4. An Android phone and laptop on the same private Wi-Fi for final acceptance. The phone must be able to reach the laptop's private IPv4 address.
+2. Python 3.9+ and PlatformIO Core (or the VS Code **PlatformIO IDE** extension, which provides the PlatformIO workflow). [PlatformIO's installation guide](https://docs.platformio.org/en/latest/core/installation/methods/installer-script.html) documents the isolated Core installer; [its requirements](https://docs.platformio.org/en/latest/core/installation/requirements.html) list supported Python versions.
+3. VS Code extensions: **PlatformIO IDE** and **Wokwi for VS Code**. Sign in/activate Wokwi as prompted.
+4. A Wokwi for VS Code license that can use the private gateway. The guide below configures its local gateway at `ws://localhost:9011`.
+5. An Android phone and laptop on the same private Wi-Fi for final acceptance. The phone must be able to reach the laptop's private IPv4 address.
 
 If the Wokwi private gateway is unavailable, finish the sensor-only serial stage. The end-to-end local bridge demo is blocked until private gateway access is available; do not replace the agreed local architecture with a cloud tunnel or broker.
 
@@ -52,12 +53,25 @@ poultri/
 
 ## Stage 1: build and prove the Wokwi sensor project
 
-The Wokwi project files already exist under `wokwi/`; do not create a second PlatformIO project. Open the Poultri repository in VS Code, install the PlatformIO IDE and Wokwi extensions listed above, then build from the existing project:
+The Wokwi project files already exist under `wokwi/`; do not create a second PlatformIO project. Install PlatformIO Core with the [official isolated installer](https://docs.platformio.org/en/latest/core/installation/methods/installer-script.html), or install the PlatformIO IDE extension in VS Code. If using the Core installer, download `get-platformio.py` from the linked official instructions and run it with Python 3.9 or newer:
 
 ```powershell
-cd .\wokwi
-pio run
+python .\get-platformio.py
 ```
+
+The installer keeps Core in the user profile and may not add `pio` to `PATH`.
+
+For this Windows setup, locate the Core executable from PowerShell and build the existing project:
+
+```powershell
+$pio = Join-Path $env:USERPROFILE '.platformio\penv\Scripts\platformio.exe'
+& $pio --version
+Push-Location .\wokwi
+& $pio run
+Pop-Location
+```
+
+If PlatformIO IDE is providing the CLI on `PATH`, `cd .\wokwi; pio run` is equivalent. The first build downloads the ESP32 platform, compiler, Arduino framework, and DHT library; an internet connection is needed for that initial build. A successful build creates `.pio/build/esp32dev/firmware.bin` and `firmware.elf` for Wokwi.
 
 The following sections document the checked-in project files for reference. No file copying is needed.
 
@@ -192,13 +206,16 @@ void loop() {
 }
 ```
 
-Build and run from the `wokwi/` directory:
+After building, run the simulator from VS Code Command Palette → **Wokwi: Start Simulator**. Use the DHT22 controls to change temperature and humidity and confirm the serial values follow the controls. The firmware reads every two seconds because that matches the DHT22 sampling interval. It continues printing readings if Wi-Fi or the bridge is unavailable.
+
+To rebuild from the repository root:
 
 ```powershell
-pio run
+$pio = Join-Path $env:USERPROFILE '.platformio\penv\Scripts\platformio.exe'
+Push-Location .\wokwi
+& $pio run
+Pop-Location
 ```
-
-Then use VS Code Command Palette → **Wokwi: Start Simulator**. Click the DHT22, change the temperature and humidity, and confirm the serial values follow the sliders. Firmware reads every two seconds because that matches the DHT22 sampling interval. The firmware continues printing readings if Wi-Fi or the bridge is unavailable.
 
 ## Stage 2: run the local Node bridge
 

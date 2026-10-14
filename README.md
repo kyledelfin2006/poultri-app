@@ -1,6 +1,21 @@
 # Poultri Wokwi + Mobile Demo
 
+<p align="center">
+  <img src="mobile/assets/poultri-logo.png" alt="Official Poultri logo" width="132" />
+  <img src="mobile/assets/poultri-wordmark.png" alt="Official Poultri wordmark" width="250" />
+</p>
+
 Poultri is an Expo / React Native TypeScript demo connected to one Wokwi ESP32 + DHT22 simulation through a local Node bridge. The mobile screen shows simulated temperature and humidity, a clearly labeled illustrative inspection prompt, acknowledgement, recovery, and reset. It is a prototype, not a farm monitoring system; no physical sensor or farm validation is included.
+
+## Demo features
+
+- Wokwi ESP32 reads the simulated DHT22 temperature and humidity every two seconds.
+- The local Node bridge keeps the latest reading in memory for the mobile app.
+- The app displays simulated readings and whether the bridge is connected or the data is stale.
+- A local illustrative temperature-rise rule shows one inspection prompt, with acknowledge, recovery, and reset actions.
+- The existing Poultri logo and wordmark are shown in the app and included above without alteration.
+
+See [mvp-requirements.md](mvp-requirements.md) for the presenter flow designed to fit under two minutes.
 
 ## Run with Expo Go
 

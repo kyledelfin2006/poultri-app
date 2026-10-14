@@ -14,6 +14,7 @@ This is a demonstration prototype, not a farm-monitoring product. Wokwi readings
 - `mobile/plugins/with-local-bridge-http.js`: Expo config plugin for Android local-LAN HTTP in the preview APK.
 - `bridge/server.mjs`: dependency-free Node HTTP bridge on port 4174 with health, latest-reading, and input validation endpoints.
 - `wokwi/`: ESP32/DHT22 PlatformIO project, diagram, and firmware that samples every two seconds and posts readings through the Wokwi private gateway.
+- Demo features: connect to the local bridge; show simulated temperature/humidity plus live/stale state; raise one illustrative local temperature-rise prompt; acknowledge it, show recovery, or reset the demo. The official logo and wordmark are included from the supplied image assets unchanged, and the root README displays them.
 - `mvp-requirements.md`: scope, acceptance criteria, and the under-two-minute presenter flow.
 - `build-requirements.md`: mobile/Wokwi/bridge architecture, setup, data contract, run instructions, verification sequence, and a future AI-chatbot plan. Chat is documented for later and is not implemented in this demo.
 
@@ -24,8 +25,9 @@ The generated Android project was refreshed from Expo config. Its manifest enabl
 ## Verification performed
 
 - Passed: `npm.cmd run lint`, `npx.cmd tsc --noEmit`, Expo prebuild-config resolution and clean Android prebuild, generated-manifest checks, Android JavaScript bundle export, `node --check bridge/server.mjs`, Wokwi diagram JSON parsing, and `git diff --check`.
-- Not verified here: firmware compilation and the Wokwi private-gateway link because PlatformIO/Wokwi are not installed in this environment; physical-phone delivery and EAS APK creation also need the configured Wokwi access, phone/Wi-Fi, and EAS credentials.
-- The bridge process starts, but the sandbox blocks HTTP socket requests from the verification shell, so its endpoint smoke checks still need to be run locally using the PowerShell commands in `build-requirements.md`.
+- Passed: PlatformIO Core 6.2.0 built the `esp32dev` firmware with Espressif32 platform 7.1.3 and DHT library 1.19.0. Build reported 14.0% RAM and 60.3% flash use; generated Wokwi firmware is under `wokwi/.pio/build/esp32dev/` (`firmware.bin`, `firmware.elf`).
+- Passed: local bridge loopback checks returned 200 for health and latest-reading, 201 for a valid reading POST, and 400 for malformed JSON and out-of-range input.
+- Not verified here: the live Wokwi private-gateway-to-bridge connection, physical-phone delivery, and EAS APK creation. These need Wokwi private-gateway access, a phone on the same Wi-Fi, and EAS credentials respectively.
 
 The Android bundle export used Expo's `--no-bytecode` option because the sandbox denied Hermes bytecode output to its temporary directory. This validates Metro bundling, not the final APK build.
 
