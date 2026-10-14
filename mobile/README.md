@@ -1,6 +1,8 @@
 # Poultri mobile
 
-Expo / React Native TypeScript starter with the official Poultri logo and wordmark. The app currently displays a static placeholder; it has no farm data, server connection, or Wokwi integration.
+Expo / React Native TypeScript app for the Wokwi demo prototype. Wokwi readings are synthetic and flow through a local Node bridge; no physical sensors are connected.
+
+See the root [MVP requirements](../mvp-requirements.md) and [build guide](../build-requirements.md) for the demo flow, network setup, and acceptance criteria.
 
 ## Start development
 

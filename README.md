@@ -1,6 +1,6 @@
 # Poultri mobile template
 
-Poultri is a small Expo / React Native TypeScript starter that preserves the official Poultri branding. It currently opens to a placeholder screen. Farm monitoring, demo data, desktop tools, and Wokwi integration are not included.
+Poultri is an Expo / React Native TypeScript prototype for demonstrating one simulated poultry-house reading from Wokwi in the mobile app. It is not a farm monitoring system and has no physical sensor or farm validation.
 
 ## Run with Expo Go
 
@@ -27,7 +27,7 @@ The build is hosted by EAS and requires an Expo account and internet access.
 ## Project files
 
 - [Mobile setup](mobile/README.md)
+- [MVP requirements and two-minute demo](mvp-requirements.md)
+- [Mobile + Wokwi architecture and AI build guide](build-requirements.md)
 - [Implementation brief](implementation.md)
 - [Agent guidance](agents.md)
-
-Wokwi support will be scoped after the follow-up instructions are provided.
