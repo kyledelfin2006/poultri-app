@@ -61,14 +61,20 @@ async function route(request, response) {
     const value = await readJson(request);
     const validTemperature = Number.isFinite(value?.temperatureC) && value.temperatureC >= -40 && value.temperatureC <= 80;
     const validHumidity = Number.isFinite(value?.humidityPct) && value.humidityPct >= 0 && value.humidityPct <= 100;
-    if (!validTemperature || !validHumidity) {
-      json(response, 400, { error: 'temperatureC or humidityPct is outside the accepted range' });
+    const validSetpoint = Number.isFinite(value?.setpointC) && value.setpointC >= -40 && value.setpointC <= 80;
+    const validAlert = typeof value?.alertActive === 'boolean';
+    const validFanSpeed = Number.isInteger(value?.fanSpeedPct) && value.fanSpeedPct >= 0 && value.fanSpeedPct <= 100;
+    if (!validTemperature || !validHumidity || !validSetpoint || !validAlert || !validFanSpeed) {
+      json(response, 400, { error: 'Reading fields are invalid or outside the accepted range' });
       return;
     }
 
     latestReading = {
       temperatureC: value.temperatureC,
       humidityPct: value.humidityPct,
+      setpointC: value.setpointC,
+      alertActive: value.alertActive,
+      fanSpeedPct: value.fanSpeedPct,
       receivedAt: new Date().toISOString(),
     };
     json(response, 201, { ok: true });

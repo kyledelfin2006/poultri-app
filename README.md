@@ -6,7 +6,7 @@
 
 ## 🐔 What is Poultri?
 
-**Poultri is a proposed monitoring system for commercial layer farms.** It is intended to help farm staff see changing conditions and identify which poultry house may need attention.
+**Poultri is a proposed on-site monitoring and environmental-control system for commercial poultry farms.** Its initial market includes layer and broiler farms, with a proposed pilot focused on layer farms. The goal is to help staff spot changing conditions and identify which house may need attention.
 
 The longer-term concept may bring together:
 
@@ -15,9 +15,11 @@ The longer-term concept may bring together:
 - **A mobile app** for viewing monitoring information and alerts.
 - **Optional farm-approved controls and SMS alerts**, depending on equipment compatibility, farm approval, and connectivity.
 
+The concept plans on-site processing so core monitoring can continue during internet interruptions. That capability is untested; remote app access still depends on connectivity.
+
 ### What this demo shows
 
-This repository demonstrates one small part of Poultri: **a simulated ESP32/DHT22 sends temperature and humidity readings from Wokwi, through a laptop bridge, to the mobile app.** The app displays the readings and an illustrative inspection prompt.
+This repository demonstrates one small part of Poultri: **a simulated ESP32/DHT22 sends temperature and humidity readings, a demo alert state, and a fan-speed indicator from Wokwi through a laptop bridge to the mobile app.** A PWM LED in Wokwi represents the fan output; it does not control physical equipment.
 
 > **Prototype status:** Poultri is still a concept and prototype. This demo uses simulated data; it has not been validated on a farm and does not provide poultry-health guidance.
 
@@ -32,11 +34,12 @@ This repository demonstrates one small part of Poultri: **a simulated ESP32/DHT2
 
 - Wokwi simulates one ESP32 and one DHT22. Change temperature and humidity from the sensor controls.
 - The ESP32 sends readings every two seconds to the local Node bridge.
-- The mobile app displays temperature, humidity, connection state, sample age, and an inspection prompt.
-- The first fresh reading after connecting or resetting is the reference. A rise of **1.5°C or more** creates one prompt. Acknowledge it; lower the temperature to show recovery; use **Reset Demo** to start a new app session.
+- The mobile app displays temperature, humidity, the demo setpoint, simulated fan percentage, connection state, sample age, and an inspection prompt.
+- The first fresh reading after connecting or resetting is saved as session context. A reading at or above the **25°C demo setpoint** creates an inspection prompt. The Wokwi LED and app show a simulated fan level: **0% below 25°C, 50% from 25°C to below 27°C, and 100% at or above 27°C**.
+- Acknowledge the prompt, lower the temperature below 25°C to show recovery, and tap **Reset Demo** to clear the app session.
 - Humidity is display-only. All values and the alert rule are illustrative.
 
-**Scope note:** the current app uses the relative **+1.5°C** rule. The proposed fixed 25°C threshold and simulated fan indicator are not implemented yet.
+**Rule note:** the concept note does not define a numerical temperature threshold or fan-control rule. The **25°C setpoint and fan levels are demo-only choices**, not farm settings or poultry-health limits. The LED is only a visual output indicator; no physical fan is connected or controlled.
 
 ## Run the connected demo
 
@@ -111,10 +114,9 @@ Install the generated APK on the phone. Keep the phone and laptop on the same Wi
 
 1. In the app, enter the laptop Wi-Fi address printed by the bridge, for example `http://192.168.1.20:4174`.
 2. Tap **Connect** and wait until the app shows a reading.
-3. Leave the Wokwi DHT22 at **24.0°C** while the app takes its first reading as the reference.
-4. Click the DHT22 in Wokwi to open its controls. Raise the temperature to **25.5°C or higher**.
-5. Wait for the next sensor update. The app should show **Temperature rise detected**.
-6. Tap **Acknowledge**. Lower the temperature to show **Reading recovered**; the prompt remains until **Reset Demo** is tapped.
+3. Leave the Wokwi DHT22 at **24.0°C** while the app takes its first reading as the session reference.
+4. Click the DHT22 in Wokwi to open its controls. Raise the temperature to **25.0°C**. The app should show an inspection prompt and **50%** simulated fan; at **27.0°C**, the fan indicator should show **100%**.
+5. Tap **Acknowledge**. Lower the temperature below **25.0°C** to show **Reading recovered**; the prompt remains until **Reset Demo** is tapped.
 
 The ESP32 samples every two seconds and the app polls the bridge every second, so allow a few seconds for each change to appear.
 
@@ -141,4 +143,4 @@ Keep the bridge running between runs. The next Wokwi POST replaces its latest re
 - [Build requirements](build-requirements.md) — architecture, bridge API, setup, and verification details.
 - [Implementation notes](implementation.md) — current feature inventory and verification status.
 
-**Prototype boundary:** no physical sensors, fan control, diagnoses, accounts, cloud services, push notifications, or farm validation.
+**Prototype boundary:** only the Wokwi temperature/humidity sensor is simulated. There is no camera, gas sensor, production record, physical fan or temperature control, SMS, diagnosis, account, cloud service, push notification, or farm validation. The simulated fan is an LED indicator only.

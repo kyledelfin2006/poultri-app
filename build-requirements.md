@@ -7,16 +7,19 @@ This guide documents the runnable demo defined in [mvp-requirements.md](mvp-requ
 ```mermaid
 flowchart LR
     DHT[DHT22 controls in Wokwi] --> ESP[ESP32 firmware]
-    ESP -->|POST every 2 seconds| Bridge[Node bridge on laptop :4174]
+    ESP -->|PWM output 0/50/100%| LED[Simulated fan LED]
+    ESP -->|POST readings + demo alert/fan state every 2 seconds| Bridge[Node bridge on laptop :4174]
     App[Poultri mobile app] -->|GET every 1 second over LAN| Bridge
-    Bridge -->|latest reading + receivedAt| App
-    App -->|illustrative +1.5 C rise rule| Prompt[One acknowledgeable inspection prompt]
+    Bridge -->|latest reading + setpoint + alert + fan state| App
+    App --> Prompt[Inspection prompt + simulated fan percentage]
 ```
 
-- **Wokwi:** one simulated ESP32 and DHT22. Firmware samples the DHT22 every two seconds and posts each valid sample.
+- **Wokwi:** one simulated ESP32, DHT22, and PWM LED. The firmware uses a demo-only 25°C alert setpoint and 0/50/100% LED levels.
 - **Bridge:** one Node.js process using built-in modules only. It keeps the most recent valid sample in memory.
-- **Mobile:** one Expo Router screen. It polls the bridge, displays current temperature/humidity, and shows one local prompt.
+- **Mobile:** one Expo Router screen. It polls the bridge, displays temperature, humidity, setpoint, fan percentage, connection state, and one acknowledgeable prompt.
 - **Network paths:** Wokwi firmware calls `http://host.wokwi.internal:4174`; the phone calls `http://<laptop-LAN-IPv4>:4174`.
+
+This is the **demo architecture**, not the planned farm installation. The concept note's on-site processing and internet-independent monitoring are future capabilities; this Wokwi-to-laptop path does not test them. The 25°C threshold and fan levels are demo choices because the concept note defines no numeric values. The LED is a visual indicator only, not a connected fan.
 
 The Wokwi Private Gateway is required for the simulator to reach the laptop. Wokwi's current networking guide says private-gateway access is for paying users; confirm your Wokwi plan/license before depending on this path. The public gateway cannot reach the laptop's local network. Wokwi for VS Code includes a bundled gateway, but its local endpoint must be available at `ws://localhost:9011`. In the current verification run, the simulator itself started and printed DHT22 readings, but reported that this endpoint was unavailable, so no readings reached the bridge. [Wokwi Wi-Fi and gateway guide](https://docs.wokwi.com/guides/esp32-wifi), [Wokwi VS Code project configuration](https://docs.wokwi.com/vscode/project-config).
 
@@ -98,19 +101,24 @@ Wokwi's DHT22 reference recommends the ESPx DHT library when reading this part f
   "editor": "wokwi",
   "parts": [
     { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
-    { "type": "wokwi-dht22", "id": "dht1", "top": -20, "left": 230, "attrs": { "temperature": "24", "humidity": "60" } }
+    { "type": "wokwi-dht22", "id": "dht1", "top": -20, "left": 230, "attrs": { "temperature": "24", "humidity": "60" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": 30, "left": 410, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "fanLed", "top": -10, "left": 510, "attrs": { "color": "green", "label": "Sim fan" } }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
     [ "esp:3V3", "dht1:VCC", "red", [] ],
     [ "esp:GND.1", "dht1:GND", "black", [] ],
-    [ "esp:15", "dht1:SDA", "green", [] ]
+    [ "esp:15", "dht1:SDA", "green", [] ],
+    [ "esp:18", "r1:1", "green", [] ],
+    [ "r1:2", "fanLed:A", "green", [] ],
+    [ "fanLed:C", "esp:GND.1", "black", [] ]
   ]
 }
 ```
 
-The DHT22 data pin is GPIO 15. Its temperature and humidity controls can be changed while the simulation is running. [Wokwi DHT22 controls](https://docs.wokwi.com/parts/wokwi-dht22).
+The DHT22 data pin is GPIO 15; the simulated fan LED is driven on GPIO 18 through a 220Ω resistor. Change the temperature and humidity controls while the simulation is running. The LED shows 0% below 25°C, 50% from 25°C to below 27°C, and 100% at or above 27°C. It is only a visual proxy; no physical fan is controlled. [Wokwi DHT22 controls](https://docs.wokwi.com/parts/wokwi-dht22).
 
 ### `wokwi/wokwi.toml`
 
@@ -135,6 +143,9 @@ Wokwi reads this file next to `platformio.ini`; build the firmware before starti
 
 namespace {
 constexpr int DHT_PIN = 15;
+constexpr int FAN_LED_PIN = 18;
+constexpr float ALERT_SETPOINT_C = 25.0f;
+constexpr float FULL_FAN_SETPOINT_C = 27.0f;
 constexpr unsigned long SAMPLE_INTERVAL_MS = 2000;
 constexpr unsigned long WIFI_RETRY_MS = 5000;
 constexpr char BRIDGE_URL[] = "http://host.wokwi.internal:4174/api/reading";
@@ -153,7 +164,13 @@ void retryWifiWhenDue(unsigned long now) {
   WiFi.begin("Wokwi-GUEST", "", 6);
 }
 
-void postReading(float temperatureC, float humidityPct) {
+int fanSpeedFor(float temperatureC) {
+  if (temperatureC >= FULL_FAN_SETPOINT_C) return 100;
+  if (temperatureC >= ALERT_SETPOINT_C) return 50;
+  return 0;
+}
+
+void postReading(float temperatureC, float humidityPct, bool alertActive, int fanSpeedPct) {
   WiFiClient client;
   HTTPClient http;
   http.setTimeout(1500);
@@ -165,7 +182,10 @@ void postReading(float temperatureC, float humidityPct) {
 
   http.addHeader("Content-Type", "application/json");
   String body = "{\"temperatureC\":" + String(temperatureC, 1) +
-                ",\"humidityPct\":" + String(humidityPct, 1) + "}";
+                ",\"humidityPct\":" + String(humidityPct, 1) +
+                ",\"setpointC\":" + String(ALERT_SETPOINT_C, 1) +
+                ",\"alertActive\":" + String(alertActive ? "true" : "false") +
+                ",\"fanSpeedPct\":" + String(fanSpeedPct) + "}";
   int status = http.POST(body);
   Serial.printf("Bridge POST status: %d\n", status);
   http.end();
@@ -175,10 +195,13 @@ void postReading(float temperatureC, float humidityPct) {
 void setup() {
   Serial.begin(115200);
   dht.setup(DHT_PIN, DHTesp::DHT22);
+  pinMode(FAN_LED_PIN, OUTPUT);
+  analogWrite(FAN_LED_PIN, 0);
   WiFi.mode(WIFI_STA);
   WiFi.begin("Wokwi-GUEST", "", 6);
   lastWifiAttemptAt = millis();
   Serial.println("Poultri Wokwi demo starting");
+  Serial.println("Demo rule: alert at 25.0 C; simulated fan 0/50/100 percent");
 }
 
 void loop() {
@@ -197,16 +220,21 @@ void loop() {
     return;
   }
 
-  Serial.printf("Temperature: %.1f C | Humidity: %.1f %%\n", sample.temperature, sample.humidity);
+  const bool alertActive = sample.temperature >= ALERT_SETPOINT_C;
+  const int fanSpeedPct = fanSpeedFor(sample.temperature);
+  analogWrite(FAN_LED_PIN, fanSpeedPct * 255 / 100);
+
+  Serial.printf("Temperature: %.1f C | Humidity: %.1f %% | Alert: %s | Simulated fan: %d%%\n",
+                sample.temperature, sample.humidity, alertActive ? "ACTIVE" : "CLEAR", fanSpeedPct);
   if (WiFi.status() == WL_CONNECTED) {
-    postReading(sample.temperature, sample.humidity);
+    postReading(sample.temperature, sample.humidity, alertActive, fanSpeedPct);
   } else {
     Serial.println("Reading not sent; Wi-Fi is disconnected");
   }
 }
 ```
 
-After building, run the simulator from VS Code Command Palette → **Wokwi: Start Simulator**. Use the DHT22 controls to change temperature and humidity and confirm the serial values follow the controls. The firmware reads every two seconds because that matches the DHT22 sampling interval. It continues printing readings if Wi-Fi or the bridge is unavailable. For a mobile alert, establish an app baseline first (the diagram defaults to 24°C), then raise temperature to at least 25.5°C. The app polls once per second and should show the illustrative prompt after the next fresh reading.
+After building, run the simulator from VS Code Command Palette → **Wokwi: Start Simulator**. Use the DHT22 controls to change temperature and humidity and confirm the serial values, alert state, and LED output follow the controls. The firmware reads every two seconds because that matches the DHT22 sampling interval. It continues printing readings if Wi-Fi or the bridge is unavailable. The diagram starts at 24°C. At 25°C the firmware activates the alert and sets the LED to 50%; at 27°C it sets the LED to 100%. The app polls once per second and mirrors the next fresh reading.
 
 To rebuild from the repository root:
 
@@ -303,14 +331,20 @@ async function route(request, response) {
     const value = await readJson(request);
     const validTemperature = Number.isFinite(value?.temperatureC) && value.temperatureC >= -40 && value.temperatureC <= 80;
     const validHumidity = Number.isFinite(value?.humidityPct) && value.humidityPct >= 0 && value.humidityPct <= 100;
-    if (!validTemperature || !validHumidity) {
-      json(response, 400, { error: 'temperatureC or humidityPct is outside the accepted range' });
+    const validSetpoint = Number.isFinite(value?.setpointC) && value.setpointC >= -40 && value.setpointC <= 80;
+    const validAlert = typeof value?.alertActive === 'boolean';
+    const validFanSpeed = Number.isInteger(value?.fanSpeedPct) && value.fanSpeedPct >= 0 && value.fanSpeedPct <= 100;
+    if (!validTemperature || !validHumidity || !validSetpoint || !validAlert || !validFanSpeed) {
+      json(response, 400, { error: 'Reading fields are invalid or outside the accepted range' });
       return;
     }
 
     latestReading = {
       temperatureC: value.temperatureC,
       humidityPct: value.humidityPct,
+      setpointC: value.setpointC,
+      alertActive: value.alertActive,
+      fanSpeedPct: value.fanSpeedPct,
       receivedAt: new Date().toISOString(),
     };
     json(response, 201, { ok: true });
@@ -355,8 +389,8 @@ Allow Node through Windows Firewall on **Private networks only** if prompted. Ch
 |---|---|
 | `GET /api/health` | `200 { "ok": true }` |
 | `GET /api/reading` before data | `200 { "reading": null }` |
-| `POST /api/reading` | JSON `{ "temperatureC": 24.0, "humidityPct": 60.0 }`; success is `201 { "ok": true }` |
-| `GET /api/reading` after data | `200 { "reading": { "temperatureC": 24.0, "humidityPct": 60.0, "receivedAt": "<ISO-8601>" } }` |
+| `POST /api/reading` | JSON `{ "temperatureC": 24.0, "humidityPct": 60.0, "setpointC": 25.0, "alertActive": false, "fanSpeedPct": 0 }`; success is `201 { "ok": true }` |
+| `GET /api/reading` after data | `200 { "reading": { "temperatureC": 24.0, "humidityPct": 60.0, "setpointC": 25.0, "alertActive": false, "fanSpeedPct": 0, "receivedAt": "<ISO-8601>" } }` |
 | Bad JSON / invalid values / unknown route | `400` or `413` / `400` / `404` JSON error |
 
 Quick PowerShell checks while the bridge is running:
@@ -364,11 +398,11 @@ Quick PowerShell checks while the bridge is running:
 ```powershell
 Invoke-RestMethod http://127.0.0.1:4174/api/health
 Invoke-RestMethod http://127.0.0.1:4174/api/reading
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:4174/api/reading -ContentType 'application/json' -Body '{"temperatureC":24,"humidityPct":60}'
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:4174/api/reading -ContentType 'application/json' -Body '{"temperatureC":24,"humidityPct":60,"setpointC":25,"alertActive":false,"fanSpeedPct":0}'
 Invoke-RestMethod http://127.0.0.1:4174/api/reading
 ```
 
-The stored sample is in-memory only and disappears when the bridge stops. The bridge accepts DHT22 temperature values from -40°C through 80°C and relative humidity from 0% through 100%; these are input bounds, not poultry guidance.
+The stored sample is in-memory only and disappears when the bridge stops. The bridge accepts DHT22 temperature values from -40°C through 80°C, relative humidity from 0% through 100%, a setpoint from -40°C through 80°C, and a simulated fan percentage from 0 through 100. These are input bounds, not poultry guidance.
 
 ## Stage 3: connect the mobile app
 
@@ -424,13 +458,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 type Reading = {
   temperatureC: number;
   humidityPct: number;
+  setpointC: number;
+  alertActive: boolean;
+  fanSpeedPct: number;
   receivedAt: string;
 };
 
 type ReadingResponse = { reading: Reading | null };
 type AlertRecord = { acknowledged: boolean; recovered: boolean };
 
-const THRESHOLD_C = 1.5;
 const STALE_AFTER_MS = 5000;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -450,6 +486,12 @@ function isReading(value: unknown): value is Reading {
   const sample = value as Partial<Reading>;
   return Number.isFinite(sample.temperatureC)
     && Number.isFinite(sample.humidityPct)
+    && Number.isFinite(sample.setpointC)
+    && typeof sample.alertActive === 'boolean'
+    && typeof sample.fanSpeedPct === 'number'
+    && Number.isInteger(sample.fanSpeedPct)
+    && sample.fanSpeedPct >= 0
+    && sample.fanSpeedPct <= 100
     && typeof sample.receivedAt === 'string'
     && Number.isFinite(Date.parse(sample.receivedAt));
 }
@@ -521,11 +563,10 @@ export default function HomeScreen() {
         if (baselineRef.current === null) {
           baselineRef.current = sample.temperatureC;
           setBaseline(sample.temperatureC);
-          return;
         }
 
-        const recovered = sample.temperatureC - baselineRef.current < THRESHOLD_C;
-        if (alertRef.current === null && !recovered) {
+        const recovered = !sample.alertActive;
+        if (alertRef.current === null && sample.alertActive) {
           const next = { acknowledged: false, recovered: false };
           alertRef.current = next;
           setAlertRecord(next);
@@ -647,24 +688,30 @@ export default function HomeScreen() {
               <Text style={styles.metricLabel}>HUMIDITY</Text>
               <Text style={styles.metricValue}>{reading ? `${reading.humidityPct.toFixed(1)}%` : '—'}</Text>
             </View>
+            <View style={styles.metric}>
+              <Text style={styles.metricLabel}>SIM FAN</Text>
+              <Text style={styles.metricValue}>{reading ? `${reading.fanSpeedPct}%` : '—'}</Text>
+            </View>
           </View>
           <Text style={styles.supporting}>
             {reading ? `Sample age: ${Math.floor(sampleAgeMs / 1000)}s` : 'No reading received yet'}
             {stale ? ' · stale' : ''}
           </Text>
-          <Text style={styles.demoLabel}>Wokwi simulated data · illustrative, unvalidated rule</Text>
+          <Text style={styles.demoLabel}>Wokwi simulated data · 25°C demo setpoint · fan is an LED indicator</Text>
         </View>
 
         <View style={styles.alertCard}>
           <Text style={styles.sectionTitle}>Inspection prompt</Text>
           {!alertRecord ? (
             <Text style={styles.supporting}>
-              {baseline === null ? 'Waiting for the reference reading.' : `Reference: ${baseline.toFixed(1)}°C. Prompt at +${THRESHOLD_C.toFixed(1)}°C.`}
+              {baseline === null
+                ? 'Waiting for the reference reading.'
+                : `Reference: ${baseline.toFixed(1)}°C · prompt at ${reading?.setpointC.toFixed(1) ?? '25.0'}°C.`}
             </Text>
           ) : (
             <>
               <Text style={styles.alertTitle}>
-                {alertRecord.recovered ? 'Reading recovered' : 'Temperature rise detected'}
+                {alertRecord.recovered ? 'Reading recovered' : 'Temperature threshold reached'}
               </Text>
               <Text style={styles.supporting}>
                 {alertRecord.acknowledged ? 'Acknowledged' : 'Please inspect House 1'}
@@ -740,7 +787,7 @@ npm.cmd install
 npx.cmd expo start
 ```
 
-Scan the QR code with Expo Go for UI iteration. Enter the laptop's Wi-Fi IPv4 bridge URL in the app and tap **Connect**. For a complete alert demo, leave the DHT22 at 24°C until the app connects and takes its baseline; then raise the simulated temperature to at least 25.5°C. For acceptance on Android, create a fresh preview APK after changing `app.json`:
+Scan the QR code with Expo Go for UI iteration. Enter the laptop's Wi-Fi IPv4 bridge URL in the app and tap **Connect**. For a complete alert demo, leave the DHT22 at 24°C while the app connects; raise it to 25°C for an alert and 50% fan indication, then to 27°C for 100%. Lower it below 25°C to show recovery. For acceptance on Android, create a fresh preview APK after changing `app.json`:
 
 ```powershell
 npx.cmd eas-cli@latest build --platform android --profile preview
@@ -750,17 +797,18 @@ Install that APK, keep phone and laptop on the same Wi-Fi, and enter the same la
 
 ## Demo logic and failure behavior
 
-- On successful Connect, `/api/health` is checked and the app clears the prior session's reading, baseline, and prompt.
-- The app polls `/api/reading` every second. The first fresh sample becomes the temperature baseline. Humidity is display-only.
-- One prompt is created when temperature is at least **1.5°C above the baseline**. It remains after acknowledgement and after recovery; the recovered/active condition can update if the temperature crosses the demo threshold again.
-- Reset clears the local baseline and prompt. The next fresh poll establishes a new baseline.
+- On successful Connect, `/api/health` is checked and the app clears the prior session's reading, reference, and prompt.
+- The app polls `/api/reading` every second. The first fresh sample is retained as session context; firmware-reported `setpointC`, `alertActive`, and `fanSpeedPct` drive the displayed alert and fan state. Humidity is display-only.
+- The firmware activates the illustrative prompt at **25°C or higher**. Fan indication is 0% below 25°C, 50% from 25°C to below 27°C, and 100% at or above 27°C. Both values are demo-only and are not poultry guidance.
+- One prompt is created on the first active sample. It remains after acknowledgement and after recovery; lowering temperature below 25°C shows recovery.
+- Reset clears the local reference and prompt. The sensor value is not changed, so lower it below 25°C or restart Wokwi before a new run.
 - Data older than five seconds is stale and cannot create or update a prompt. A request failure changes the connection status to disconnected and preserves the last displayed sample with its age/stale label.
 - If Wokwi stops posting, the bridge continues returning the last sample; after five seconds the app marks it stale. If the bridge stops, the app reports disconnected.
-- No readings, URL, or prompt are persisted across launches. There are no controls, diagnoses, accounts, cloud services, or physical sensor inputs.
+- No readings, URL, or prompt are persisted across launches. There are no physical actuators, diagnoses, accounts, cloud services, or physical sensor inputs; the Wokwi LED is a simulated fan indicator only.
 
 ## AI chatbot plan (future work, not in this demo)
 
-The current inspection prompt is a deterministic local rule; this prototype does not contain a chatbot or send sensor data to an AI service. Keep chat out of the two-minute demo until a separate implementation request defines the provider and approved content.
+The current inspection prompt is a deterministic firmware rule; this prototype does not contain a chatbot or send sensor data to an AI service. The supplied concept note does not define an AI chatbot. Keep chat as a separate future idea, outside the two-minute demo, until its product scope and approved content are defined.
 
 ```mermaid
 flowchart LR
@@ -795,10 +843,10 @@ flowchart LR
 1. **Firmware build:** from `wokwi/`, `pio run` succeeds. The simulator starts and DHT22 slider changes appear in serial output.
 2. **Bridge:** check health, empty state, valid POST/GET, malformed JSON rejection, invalid range rejection, and latest-reading replacement. If installed, run `wokwi-cli lint` on `wokwi/diagram.json`.
 3. **Mobile static checks:** from `mobile/`, run `npm.cmd run lint` and `npx.cmd tsc --noEmit`. Resolve Expo config with `npx.cmd expo config --type prebuild` and verify the local HTTP plugin loads.
-4. **Phone network check:** with the bridge, gateway, and Wokwi running, Android on the same Wi-Fi sees samples update after slider changes. Stop Wokwi and confirm stale; restart Wokwi, raise temperature by at least 1.5°C, acknowledge, lower temperature below the trigger, and confirm recovery without losing the prompt. Reset and confirm the next fresh sample becomes the reference.
+4. **Phone network check:** with the bridge, gateway, and Wokwi running, Android on the same Wi-Fi sees samples and fan state update after slider changes. Verify 24.9°C = clear/0%, 25.0°C = alert/50%, 27.0°C = alert/100%, and below 25°C = recovered/0%. Stop Wokwi and confirm stale. Acknowledge, reset the app state, and confirm the next fresh reading becomes the session reference.
 5. **Timed demo:** rehearse the presenter path in [mvp-requirements.md](mvp-requirements.md) with setup complete; it must finish in under two minutes.
 
-Passing lint or type checks is not proof of Android network delivery. Do not describe this prototype as physical sensor integration, an on-site poultry system, a validated alert rule, or a field-tested product.
+Passing lint or type checks is not proof of Android network delivery. Do not describe this prototype as physical sensor integration, the concept note's on-site/offline system, physical fan control, a validated alert rule, or a field-tested product.
 
 ## Official references
 

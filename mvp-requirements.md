@@ -6,6 +6,14 @@ Define a small prototype that lets a presenter change a simulated poultry-house 
 
 This is a demonstration of a proposed workflow. It is not a farm monitoring system, field trial, or validated alert product.
 
+## Alignment with the Poultri concept note
+
+The supplied concept note is the source of truth for Poultri's product intent. This MVP demonstrates only its staff-review workflow: one simulated house, temperature and humidity readings, and a mobile inspection prompt that can be acknowledged and reset.
+
+The concept note does not set a numerical temperature threshold or fan-control rule. This demo uses a **25°C setpoint** and a **0/50/100% LED fan indicator** as user-chosen demonstration behavior only; neither is a farm setting or poultry-health limit.
+
+The following concept capabilities remain outside this demo: camera or bird-movement analysis; ammonia/CO₂ sensors; production records; multiple houses; on-site edge processing and internet-independent operation; real fan/temperature controls; and SMS. The concept note's proposed alert timing, detection rate, offline duration, and field-trial duration are future evaluation targets, not results or acceptance criteria for this prototype.
+
 ## Audience and user
 
 - **Demo audience:** startup challenge judges, mentors, and prospective farm stakeholders.
@@ -13,12 +21,13 @@ This is a demonstration of a proposed workflow. It is not a farm monitoring syst
 
 ## Functional requirements
 
-1. Wokwi simulates one ESP32 and one DHT22 sensor. A presenter can change temperature and humidity while simulation is running.
-2. The mobile app shows the latest temperature and humidity, the source as **Wokwi simulated data**, and whether the connection is waiting, connected, stale, or disconnected.
-3. The first valid reading after connecting or resetting becomes the session reference. The app creates one inspection prompt when temperature rises by at least **1.5°C** above that reading. This is an illustrative demo rule, not a poultry-health threshold. Humidity is displayed but does not trigger an alert.
-4. The presenter can acknowledge the prompt. If temperature later returns below the trigger, show that the reading recovered while retaining the alert until the demo is reset.
-5. **Reset Demo** clears the app's reference and alert. The next valid reading becomes the new reference; the Wokwi simulation and bridge do not need to restart.
-6. The presenter can enter the laptop's local bridge URL in the app and connect before starting the timed walkthrough.
+1. Wokwi simulates one ESP32, one DHT22, and one PWM LED labeled as a simulated fan. The presenter can change temperature and humidity while simulation is running.
+2. The ESP32 marks the alert active at **25°C or higher** and drives the LED as a visual fan indicator: **0% below 25°C, 50% from 25°C to below 27°C, and 100% at or above 27°C**. These are demo values only; the LED is not a physical fan.
+3. The mobile app shows the latest temperature, humidity, demo setpoint, simulated fan percentage, the source as **Wokwi simulated data**, and whether the connection is waiting, connected, stale, or disconnected. Humidity is display-only.
+4. The first valid reading after connecting or resetting is retained as session context. It does not set the alert threshold.
+5. The app creates one inspection prompt from the firmware alert state. The presenter can acknowledge it. When temperature falls below 25°C, show recovery while retaining the prompt until reset.
+6. **Reset Demo** clears the app's session reference and prompt. It does not change the Wokwi DHT22 value; lower the sensor below 25°C or restart Wokwi before beginning another alert run.
+7. The presenter can enter the laptop's local bridge URL in the app and connect before starting the timed walkthrough.
 
 ## Two-minute presenter walkthrough
 
@@ -26,17 +35,17 @@ Complete setup before starting the timer: run the bridge, start Wokwi with its p
 
 | Time | Presenter action | What the audience sees |
 |---|---|---|
-| 0:00–0:20 | Show the connected app and steady Wokwi reading. | One house, temperature, humidity, and simulated-data labels. |
-| 0:20–0:45 | Raise temperature in the Wokwi DHT22 control. | The app updates with the new reading. |
-| 0:45–1:10 | Point out the generated inspection prompt. | Temperature change is compared with the session reference and labeled as a demo rule. |
-| 1:10–1:30 | Acknowledge the prompt in the app. | The record changes to acknowledged. |
-| 1:30–1:50 | Return temperature near its starting value. | The reading recovers; the inspection record remains visible. |
-| 1:50–2:00 | State the prototype boundary. | Wokwi simulation only; no real sensors, camera analysis, diagnosis, controls, SMS, or farm validation. |
+| 0:00–0:20 | Show the connected app and steady 24°C Wokwi reading. | One demo house, temperature, humidity, 25°C demo setpoint, fan at 0%, and simulated-data labels. |
+| 0:20–0:45 | Raise temperature to 25°C using the Wokwi DHT22 control. | The app updates; the inspection prompt appears and the simulated fan shows 50%. |
+| 0:45–1:05 | Raise temperature to 27°C. | Wokwi LED brightness and app fan indicator show 100%. |
+| 1:05–1:25 | Acknowledge the prompt, then lower temperature below 25°C. | The prompt shows acknowledged and recovered; it remains visible. |
+| 1:25–1:45 | Reset the app demo. | The prompt and session reference clear. |
+| 1:45–2:00 | State the prototype boundary. | Wokwi simulation only; the LED represents a fan, and no real sensors, camera analysis, diagnosis, physical controls, SMS, or farm validation are included. |
 
 ## Out of scope
 
 - Multiple houses, farm profiles, production records, accounts, or cloud data storage.
-- Cameras, bird-activity classification, ammonia/CO₂ measurement, SMS, and fan or temperature-control commands.
+- Cameras, bird-activity classification, ammonia/CO₂ measurement, SMS, and physical fan or temperature-control commands.
 - Clinical or husbandry advice, validated safety thresholds, farm compatibility claims, offline-duration claims, or measured farm outcomes.
 - Production security, multi-user access, internet deployment, and remote monitoring.
 
@@ -45,7 +54,7 @@ The Wokwi MQ-2 part is a combustible-gas model and must not be presented as an a
 ## Success criteria
 
 - The presenter can change the Wokwi DHT22 input and see the app update over the local connection.
-- A temperature rise of 1.5°C or more above the session reference creates exactly one prompt; acknowledging, recovery, and reset behave as described.
+- A reading below 25°C shows no prompt and 0% fan; 25°C shows one prompt and 50%; 27°C shows 100%; falling below 25°C shows recovery. Acknowledgement and reset behave as described.
 - Disconnection and stale data are labeled so old readings are not mistaken for current readings.
 - A prepared presenter completes the walkthrough within two minutes without implying that simulated readings are live farm data.
 

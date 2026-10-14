@@ -14,13 +14,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 type Reading = {
   temperatureC: number;
   humidityPct: number;
+  setpointC: number;
+  alertActive: boolean;
+  fanSpeedPct: number;
   receivedAt: string;
 };
 
 type ReadingResponse = { reading: Reading | null };
 type AlertRecord = { acknowledged: boolean; recovered: boolean };
 
-const THRESHOLD_C = 1.5;
 const STALE_AFTER_MS = 5000;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -40,6 +42,12 @@ function isReading(value: unknown): value is Reading {
   const sample = value as Partial<Reading>;
   return Number.isFinite(sample.temperatureC)
     && Number.isFinite(sample.humidityPct)
+    && Number.isFinite(sample.setpointC)
+    && typeof sample.alertActive === 'boolean'
+    && typeof sample.fanSpeedPct === 'number'
+    && Number.isInteger(sample.fanSpeedPct)
+    && sample.fanSpeedPct >= 0
+    && sample.fanSpeedPct <= 100
     && typeof sample.receivedAt === 'string'
     && Number.isFinite(Date.parse(sample.receivedAt));
 }
@@ -111,11 +119,10 @@ export default function HomeScreen() {
         if (baselineRef.current === null) {
           baselineRef.current = sample.temperatureC;
           setBaseline(sample.temperatureC);
-          return;
         }
 
-        const recovered = sample.temperatureC - baselineRef.current < THRESHOLD_C;
-        if (alertRef.current === null && !recovered) {
+        const recovered = !sample.alertActive;
+        if (alertRef.current === null && sample.alertActive) {
           const next = { acknowledged: false, recovered: false };
           alertRef.current = next;
           setAlertRecord(next);
@@ -237,24 +244,30 @@ export default function HomeScreen() {
               <Text style={styles.metricLabel}>HUMIDITY</Text>
               <Text style={styles.metricValue}>{reading ? `${reading.humidityPct.toFixed(1)}%` : '—'}</Text>
             </View>
+            <View style={styles.metric}>
+              <Text style={styles.metricLabel}>SIM FAN</Text>
+              <Text style={styles.metricValue}>{reading ? `${reading.fanSpeedPct}%` : '—'}</Text>
+            </View>
           </View>
           <Text style={styles.supporting}>
             {reading ? `Sample age: ${Math.floor(sampleAgeMs / 1000)}s` : 'No reading received yet'}
             {stale ? ' · stale' : ''}
           </Text>
-          <Text style={styles.demoLabel}>Wokwi simulated data · illustrative, unvalidated rule</Text>
+          <Text style={styles.demoLabel}>Wokwi simulated data · 25°C demo setpoint · fan is an LED indicator</Text>
         </View>
 
         <View style={styles.alertCard}>
           <Text style={styles.sectionTitle}>Inspection prompt</Text>
           {!alertRecord ? (
             <Text style={styles.supporting}>
-              {baseline === null ? 'Waiting for the reference reading.' : `Reference: ${baseline.toFixed(1)}°C. Prompt at +${THRESHOLD_C.toFixed(1)}°C.`}
+              {baseline === null
+                ? 'Waiting for the reference reading.'
+                : `Reference: ${baseline.toFixed(1)}°C · prompt at ${reading?.setpointC.toFixed(1) ?? '25.0'}°C.`}
             </Text>
           ) : (
             <>
               <Text style={styles.alertTitle}>
-                {alertRecord.recovered ? 'Reading recovered' : 'Temperature rise detected'}
+                {alertRecord.recovered ? 'Reading recovered' : 'Temperature threshold reached'}
               </Text>
               <Text style={styles.supporting}>
                 {alertRecord.acknowledged ? 'Acknowledged' : 'Please inspect House 1'}

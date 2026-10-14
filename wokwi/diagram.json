@@ -4,13 +4,18 @@
   "editor": "wokwi",
   "parts": [
     { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
-    { "type": "wokwi-dht22", "id": "dht1", "top": -20, "left": 230, "attrs": { "temperature": "24", "humidity": "60" } }
+    { "type": "wokwi-dht22", "id": "dht1", "top": -20, "left": 230, "attrs": { "temperature": "24", "humidity": "60" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": 30, "left": 410, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "fanLed", "top": -10, "left": 510, "attrs": { "color": "green", "label": "Sim fan" } }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
     [ "esp:3V3", "dht1:VCC", "red", [] ],
     [ "esp:GND.1", "dht1:GND", "black", [] ],
-    [ "esp:15", "dht1:SDA", "green", [] ]
+    [ "esp:15", "dht1:SDA", "green", [] ],
+    [ "esp:18", "r1:1", "green", [] ],
+    [ "r1:2", "fanLed:A", "green", [] ],
+    [ "fanLed:C", "esp:GND.1", "black", [] ]
   ]
 }

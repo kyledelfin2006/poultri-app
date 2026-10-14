@@ -4,6 +4,9 @@
 
 namespace {
 constexpr int DHT_PIN = 15;
+constexpr int FAN_LED_PIN = 18;
+constexpr float ALERT_SETPOINT_C = 25.0f;
+constexpr float FULL_FAN_SETPOINT_C = 27.0f;
 constexpr unsigned long SAMPLE_INTERVAL_MS = 2000;
 constexpr unsigned long WIFI_RETRY_MS = 5000;
 constexpr char BRIDGE_URL[] = "http://host.wokwi.internal:4174/api/reading";
@@ -22,7 +25,13 @@ void retryWifiWhenDue(unsigned long now) {
   WiFi.begin("Wokwi-GUEST", "", 6);
 }
 
-void postReading(float temperatureC, float humidityPct) {
+int fanSpeedFor(float temperatureC) {
+  if (temperatureC >= FULL_FAN_SETPOINT_C) return 100;
+  if (temperatureC >= ALERT_SETPOINT_C) return 50;
+  return 0;
+}
+
+void postReading(float temperatureC, float humidityPct, bool alertActive, int fanSpeedPct) {
   WiFiClient client;
   HTTPClient http;
   http.setTimeout(1500);
@@ -34,7 +43,10 @@ void postReading(float temperatureC, float humidityPct) {
 
   http.addHeader("Content-Type", "application/json");
   String body = "{\"temperatureC\":" + String(temperatureC, 1) +
-                ",\"humidityPct\":" + String(humidityPct, 1) + "}";
+                ",\"humidityPct\":" + String(humidityPct, 1) +
+                ",\"setpointC\":" + String(ALERT_SETPOINT_C, 1) +
+                ",\"alertActive\":" + String(alertActive ? "true" : "false") +
+                ",\"fanSpeedPct\":" + String(fanSpeedPct) + "}";
   int status = http.POST(body);
   Serial.printf("Bridge POST status: %d\n", status);
   http.end();
@@ -44,10 +56,13 @@ void postReading(float temperatureC, float humidityPct) {
 void setup() {
   Serial.begin(115200);
   dht.setup(DHT_PIN, DHTesp::DHT22);
+  pinMode(FAN_LED_PIN, OUTPUT);
+  analogWrite(FAN_LED_PIN, 0);
   WiFi.mode(WIFI_STA);
   WiFi.begin("Wokwi-GUEST", "", 6);
   lastWifiAttemptAt = millis();
   Serial.println("Poultri Wokwi demo starting");
+  Serial.println("Demo rule: alert at 25.0 C; simulated fan 0/50/100 percent");
 }
 
 void loop() {
@@ -66,9 +81,14 @@ void loop() {
     return;
   }
 
-  Serial.printf("Temperature: %.1f C | Humidity: %.1f %%\n", sample.temperature, sample.humidity);
+  const bool alertActive = sample.temperature >= ALERT_SETPOINT_C;
+  const int fanSpeedPct = fanSpeedFor(sample.temperature);
+  analogWrite(FAN_LED_PIN, fanSpeedPct * 255 / 100);
+
+  Serial.printf("Temperature: %.1f C | Humidity: %.1f %% | Alert: %s | Simulated fan: %d%%\n",
+                sample.temperature, sample.humidity, alertActive ? "ACTIVE" : "CLEAR", fanSpeedPct);
   if (WiFi.status() == WL_CONNECTED) {
-    postReading(sample.temperature, sample.humidity);
+    postReading(sample.temperature, sample.humidity, alertActive, fanSpeedPct);
   } else {
     Serial.println("Reading not sent; Wi-Fi is disconnected");
   }
